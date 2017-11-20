@@ -7,6 +7,8 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var user = require('./routes/user');
+var topic = require('./routes/topic');
+var comment = require('./routes/comment');
 
 var app = express();
 
@@ -26,6 +28,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/login', user.login);
 app.use('/signup', user.signUp);
+app.post('/topic/:user_id', topic.addNewTopic);
+app.delete('/topic/:topic_id', topic.deleteTopic);
+app.post('/comment/:user_id', topic.addNewComment);
+app.delete('/comment/:comment_id', topic.deleteComment);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

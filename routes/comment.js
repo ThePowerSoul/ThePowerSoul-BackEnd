@@ -1,54 +1,50 @@
-var User = require('../models/comment');
+var Comment = require('../models/comment');
 var express = require('express');
 var router = express.Router();
-var mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/thepowersouldb');
-var db = mongoose.connection;
-
-db.on('error',function(err){
-    console.log('connection error',err);
-});
-db.once('open',function(){
-    console.log('connected to database');
-});
-
-router.addNewComment = function(req,res){
-    var input = req.body;
-    res.json({message: "Coffee Not Found"});
-        // User.find({"email": input.email},function(err,users){
-    //     if(users.length == 0){
-    //         var user = new User();
-    //         user.name = req.body.name;
-    //         user.email = req.body.email;
-    //         user.password = req.body.password;
-    //         user.save(function(err){
-    //         if(err){
-    //             res.send(err);
-    //         }else{
-    //             res.json({message: "User Added Successfully!"});
-    //         }
-    //         });
-    //     }else{
-    //         res.json({message: "This email has been used!"});
-    //     }
-    // });
+//获取某帖子下所有评论
+router.getTopicComments = function(req, res) {
+    var getTopicCommentsPromise = Comment.find({TopicID: req.params.topic_id});
+    getTopicCommentsPromise.then(function(data) {
+        res.json(data);
+    }, function(error) {
+        res.send(error);
+    });
 }
 
-router.deleteComment = function(req,res){
+// 添加新的评论
+router.addNewComment = function(req, res){
     var input = req.body;
-    res.json({message: "Coffee Not Found"});
-    // User.find({"email": input.email},function(err,user){
-    //  if(user.length != 0){
-    //  	if(user[0].password == input.password){
-    //         res.json({obj: user[0]});
-    //     }else{
-    //         res.json({message: "Password wrong!"});
-    //     }
-    // }else{
-    //     res.json({message: "User does not exist!"});
-    // }	
-    // });
+    var comment = new Comment();
+    comment.TargetContextID = req.params.target_context_id; // 回复的上下文的id，第一次的话为null
+    comment.UserID = req.params.user_id;
+    comment.TopicID = req.params.topic_id;
+    comment.CreatedAt = new Date();
+    comment.Content = input.Content;
+    comment.Title = input.Title;
+    comment.TargetAuthor = input.TargetAuthor; // 回复的对象
+    comment.Author = input.Author;
+    comment.Like = 0;
+    comment.Dislike = 0;
+    var addNewCommentPromise = comment.save();
+    addNewCommentPromise.then(function(data) {
+        res.json({message: "Add new comment successfully"});
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+// 删除评论
+router.deleteComment = function(req, res){
+    var deleteCommentPromise = Comment.findByIdAndRemove(req.params.comment_id);
+    deleteCommentPromise.then(function(data) {
+        res.json({message: "Delete comment successfully"});
+    }, function(error) {
+        res.send(error);
+    });
 }
 
 module.exports = router;
+
+
+

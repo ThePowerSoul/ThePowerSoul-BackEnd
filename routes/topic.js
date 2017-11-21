@@ -15,6 +15,24 @@ db.once('openUri',function(){
     console.log('connected to database');
 });
 
+router.getTopics = function(req, res){
+    var pageNum = req.input.Page;
+    var category = req.input.Category;
+    var keyword = req.input.Keywordl
+    var loadAll = req.input.LoadAll;
+    if (loadALl) {
+        var getTopics = Topic.find();
+        getTopics.then(function(data) {
+            res.json(data);
+        }, function(error) {
+            res.send(error);
+        });
+    } else {
+
+    }
+    
+}
+
 // 找到对应用户发的所有帖子
 router.getUserTopics = function(req, res){
     var getUserTopicsPromise = Topic.find({UserID: req.params.user_id});

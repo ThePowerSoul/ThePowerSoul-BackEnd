@@ -33,7 +33,9 @@ app.post('/login', user.login);
 app.post('/signup', user.signUp);
 
 // topic
+app.get('/topic', topic.getTopics);
 app.get('/topic/:user_id', topic.getUserTopics);
+app.get('/topic/:user_id/:topic_id', topic.getTopicDetail);
 app.post('/topic/:user_id', topic.addNewTopic);
 app.delete('/topic/:topic_id', topic.deleteTopic);
 

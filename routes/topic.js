@@ -15,6 +15,31 @@ db.once('openUri',function(){
     console.log('connected to database');
 });
 
+// 加载某个帖子的详情
+router.getTopicDetail = function(req, res) {
+    
+}
+
+// 首页根据条件加载帖子列表，后端分页
+router.getTopics = function(req, res) {
+    var input = req.body;
+    var pageNum = input.Page;
+    var category = input.Category;
+    var keyword = input.Keyword;
+    var LoadAll = input.LoadAll;
+    if (LoadAll) {
+        // 没有类别筛选
+        // 直接根据关键字筛选
+        if (keyword !== '') {
+            // 根据关键字筛选后，再根据页数筛选
+        } else {
+            // 直接根据页数筛选
+        }
+    } else {
+        // 有类别筛选
+    }
+}
+
 // 找到对应用户发的所有帖子
 router.getUserTopics = function(req, res){
     var getUserTopicsPromise = Topic.find({UserID: req.params.user_id});

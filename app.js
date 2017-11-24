@@ -11,6 +11,7 @@ var topic = require('./routes/topic');
 var comment = require('./routes/comment');
 var article = require('./routes/article');
 var articleDraft = require('./routes/article-draft');
+var privateMessage = require('./routes/private-message');
 
 var app = express();
 
@@ -40,7 +41,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // user
 app.use('/', index);
-app.get('user-detail/:user_id', user.getDetail);
+app.post('/users', user.getUsers);
+app.get('/user-detail/:user_id/:target_id', user.getFollowingStatus);
+app.post('/user-following/:user_id/:target_id', user.addToFollowing);
 app.post('/login', user.login);
 app.post('/signup', user.signUp);
 
@@ -65,6 +68,9 @@ app.delete('/article/:article_id', article.deleteArticle);
 app.get('/article-draft/:user_id', articleDraft.getUserArticleDrafts);
 app.post('/article-draft/:user_id', articleDraft.addNewArticleDraft);
 app.delete('/article-draft/:article_draft_id', articleDraft.deleteArticleDraft);
+
+// private message
+app.post('/private-message/:user_id/', privateMessage.sendPrivateMessage);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

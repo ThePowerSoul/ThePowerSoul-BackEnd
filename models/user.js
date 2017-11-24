@@ -6,6 +6,7 @@ var UserSchema = new mongoose.Schema({
     HashedPassword: String, // 密码
     AvatarID: String, // 头像id
     CreatedAt: Date, //  创建时间
+    FollowingUsers: Array, // 正在关注的人的id数组
     WechatID: String, // 微信id
     Point: Number, // 积分
     IsVerified: Boolean, // 是否是大v

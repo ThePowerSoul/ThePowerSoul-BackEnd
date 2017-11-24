@@ -2,11 +2,59 @@ var User = require('../models/user');
 var express = require('express');
 var router = express.Router();
 
-router.getDetail = function(req, res) {
+/*
+    获得目标用户信息
+    判断是否在当前用户关注列表中
+*/
+router.getFollowingStatus = function(req, res) {
     var user_id = req.params.user_id;
-    var getUserDetailPromise = User.find({_id: user_id});
-    getUserDetailPromise.then(function(data) {
-        //
+    var target_id = req.params.target_id;
+    getFollowingStatusPromise = User.find({"$or": [{"_id": user_id}, {"_id": target_id}]});
+    getFollowingStatusPromise.then(function(data) {
+        console.log(data);
+        var user = data[0];
+        var targetUser = data[1];
+        var obj = {};
+        obj.Data = data[1];
+        if (user.FollowingUsers.indexOf(targetUser._id) >= 0) {
+            obj.IsFollowing = true;
+        } else {
+            obj.IsFollowing = false;
+        }
+        res.send(obj);
+    }, function(error) {
+        res.send(error);
+    }); 
+}
+
+/*
+    搜索用户
+*/
+router.getUsers = function(req, res) {
+    var emailKeyword = req.body.EmailKeyword;
+    var getUsersPromise = User.find();
+    var arr = [];
+    getUsersPromise.then(function(data) {
+        for (var index = 0; index < data.length; index++) {
+            if (data[index].Email.indexOf(emailKeyword) >= 0) {
+                arr.push(data[index]);
+            }
+        }
+        res.send(200, arr);
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+/*
+    添加用户到自己的关注列表
+*/
+router.addToFollowing = function(req, res) {
+    var user_id = req.params.user_id;
+    var target_id = req.params.target_id;
+    var getUserPromise = User.update({_id: user_id}, {$push: {"FollowingUsers": target_id}});
+    getUserPromise.then(function(data) {
+        res.send(200, '关注成功');
     }, function(error) {
         res.send(error);
     });
@@ -43,6 +91,7 @@ router.signUp = function(req, res){
                     newUser.IsAdmin = false;
                     newUser.PhoneNumber = "";
                     newUser.VerifiedPhoneNumber = "";
+                    newUser.FollowingUsers = [];
                     var addNewUserPromise = newUser.save();
                     addNewUserPromise.then(function(data) { // 注册成功
                         res.send(200, {
@@ -74,6 +123,7 @@ router.login = function(req,res){
     var email = input.Email;
     var password = input.Password;
     // 检查用户名是否合法
+    console.log(req.body);
     var getUserInstancePromise = User.find({Email: email});
     getUserInstancePromise.then(function(data) {
         if (data.length > 0) {

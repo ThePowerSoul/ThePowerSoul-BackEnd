@@ -18,10 +18,10 @@ var app = express();
 app.all('*', function(req, res, next) {
     // add details of what is allowed in HTTP request headers to the response headers
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Credentials', false);
-    res.header('Access-Control-Max-Age', '86400');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Max-Age', '1000');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding');
     // the next() function continues execution and will move onto the requested URL/URI
     next();
 });
@@ -43,7 +43,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.post('/users', user.getUsers);
 app.get('/user-detail/:user_id/:target_id', user.getFollowingStatus);
-app.post('/user-following/:user_id/:target_id', user.addToFollowing);
+app.put('/user-follow/:user_id/:target_id', user.addToFollowing);
+app.put('/user-unfollow/:user_id/:target_id', user.removeFromFollowing);
 app.post('/login', user.login);
 app.post('/signup', user.signUp);
 

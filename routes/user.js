@@ -11,7 +11,6 @@ router.getFollowingStatus = function(req, res) {
     var target_id = req.params.target_id;
     getFollowingStatusPromise = User.find({"$or": [{"_id": user_id}, {"_id": target_id}]});
     getFollowingStatusPromise.then(function(data) {
-        console.log(data);
         var user = data[0];
         var targetUser = data[1];
         var obj = {};
@@ -59,6 +58,21 @@ router.addToFollowing = function(req, res) {
         res.send(error);
     });
 }
+
+/*
+    将用户从自己的关注中移除
+*/
+router.removeFromFollowing = function(req, res) {
+    var user_id = req.params.user_id;
+    var target_id = req.params.target_id;
+    var getUserPromise = User.update({_id: user_id}, {$pull: {"FollowingUsers": target_id}});
+    getUserPromise.then(function(data) {
+        res.send(200, '取消关注成功');
+    }, function(error) {
+        res.send(error);
+    });
+}
+
 
 /*
     注册

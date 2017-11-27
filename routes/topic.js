@@ -17,7 +17,13 @@ db.once('openUri',function(){
 
 // 加载某个帖子的详情
 router.getTopicDetail = function(req, res) {
-    
+    var topic_id = req.params.topic_id;
+    var getTopicDetailPromise = Topic.find({_id: topic_id});
+    getTopicDetailPromise.then(function(data) {
+        res.send(200, data[0]);
+    }, function(error) {
+        res.send(error);
+    });
 }
 
 // 首页根据条件加载帖子列表，后端分页
@@ -59,11 +65,13 @@ router.getUserTopics = function(req, res){
 // 用户发一个新帖子
 router.addNewTopic = function(req, res){
     var input = req.body;
+    console.log(input);
     var topic = new Topic();
     topic.UserID = req.params.user_id;
     topic.CreatedAt = new Date();
-    topic.Content = input.Content;
-    topic.Title = input.Title;
+    topic.Content = input.Topic["Content"];
+    topic.Title = input.Topic["Title"];
+    topic.Category = input.Topic["Category"];
     topic.Author = input.Author;
     topic.Like = 0;
     topic.Dislike = 0;

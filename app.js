@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 var index = require('./routes/index');
 var user = require('./routes/user');
@@ -15,15 +16,33 @@ var privateMessage = require('./routes/private-message');
 
 var app = express();
 
-app.all('*', function(req, res, next) {
-    // add details of what is allowed in HTTP request headers to the response headers
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Max-Age', '1000');
-    res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding');
-    // the next() function continues execution and will move onto the requested URL/URI
-    next();
+// app.all('*', function(req, res, next) {
+//     // add details of what is allowed in HTTP request headers to the response headers
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
+//     res.header('Access-Control-Allow-Credentials', false);
+//     res.header('Access-Control-Max-Age', '1000');
+//     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding');
+//     // the next() function continues execution and will move onto the requested URL/URI
+//     next();
+// });
+
+// app.all('*', function(req, res, next) {  
+//   res.header("Access-Control-Allow-Origin", "*");  
+//   res.header("Access-Control-Allow-Headers", "X-Requested-With");  
+//   res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");  
+//   res.header("X-Powered-By",' 3.2.1')  
+//   res.header("Content-Type", "application/json;charset=utf-8");  
+//   next();  
+// });  
+
+app.use(cors());
+
+app.use(function(req, res, next) {
+   res.header("Access-Control-Allow-Origin", "*");
+   res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
+   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   next();
 });
 
 // view engine setup
@@ -49,7 +68,7 @@ app.post('/login', user.login);
 app.post('/signup', user.signUp);
 
 // topic
-app.get('/topic', topic.getTopics);
+app.post('/topic', topic.getTopics);
 app.get('/topic/:user_id', topic.getUserTopics);
 app.get('/topic/:user_id/:topic_id', topic.getTopicDetail);
 app.post('/topic/:user_id', topic.addNewTopic);
@@ -57,7 +76,9 @@ app.delete('/topic/:topic_id', topic.deleteTopic);
 
 //comment
 app.get('/comment/:topic_id', comment.getTopicComments);
-app.post('/comment/:target_context_id/:topic_id/:user_id/:targer_user_id', comment.addNewComment);
+app.post('/comment/:user_id/:topic_id', comment.addNewComment);
+app.get('/comment/:user_id/:target_user_id/:context_id', comment.getConversation);
+app.put('/comment/:user_id/:comment_id/:operation_type', comment.likeOrDislike);
 app.delete('/comment/:comment_id', comment.deleteComment);
 
 // article

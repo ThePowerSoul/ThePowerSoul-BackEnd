@@ -5,8 +5,6 @@ var ArticleDraftSchema = new mongoose.Schema({
     	Title: String,
     	Category: String,
     	CreatedAt: Date,
-    	Author: String,
-   	    Like: Number,
-   	    Dislike: Number
+    	Author: String
 });
 module.exports = mongoose.model('ArticleDraft', ArticleDraftSchema);

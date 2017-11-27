@@ -3,17 +3,68 @@ var express = require('express');
 var uuid = require('node-uuid');
 var router = express.Router();
 
-var mongoose = require('mongoose');
-var uri = "mongodb://127.0.0.1:27017/thepowersouldb";
-mongoose.connect(uri);
-var db = mongoose.connection;
+function likeTheTopic(topic_id, user_id, res) {
+    var likeTopicPromise = Topic.update({_id: topic_id}, {$push: {"LikeUser": user_id}});
+    likeTopicPromise.then(function(data) {
+        console.log("add-like")
+        res.send(200, data);
+    }, function(error) {
+        res.send(error);
+    });
+}
 
-db.on('error',function(err){
-    console.log('connection error', err);
-});
-db.once('openUri',function(){
-    console.log('connected to database');
-});
+function dislikeTheTopic(topic_id, user_id, res) {
+    var dislikeTopicPromise = Topic.update({_id: topic_id}, {$push: {"DislikeUser": user_id}});
+    dislikeTopicPromise.then(function(data) {
+        console.log("add-dislike")
+        res.send(200, data);
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+function removeFromLikeList(topic_id, user_id, res) {
+    var removeLikeTopicPromise = Topic.update({_id: topic_id}, {$pull: {"LikeUser": user_id}});
+    return removeLikeTopicPromise.then(function(data) {
+        console.log("dd-remove-like");
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+function removeFromDislikeList(topic_id, user_id, res) {
+    var removeDislikeTopicPromise = Topic.update({_id: topic_id}, {$pull: {"DislikeUser": user_id}});
+    return removeDislikeTopicPromise.then(function(data) {
+        console.log("dd-remove-dislike");
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+// 点赞或者取消赞
+router.likeOrDislike = function(req, res) {
+    var user_id = req.params.user_id;
+    var topic_id = req.params.topic_id;
+    var operationType = req.params.operation_type;
+    var findTopicPromise = Topic.find({_id: topic_id});
+    findTopicPromise.then(function(data){
+        if (operationType === "up") { // 点赞
+            if (data[0].LikeUser.indexOf(user_id) >= 0) {
+                res.send(400, "Added");
+            } else {
+                removeFromDislikeList(topic_id, user_id, res).then(likeTheTopic(topic_id, user_id, res));
+            }
+        } else if (operationType === "down") { //取消赞
+            if (data[0].DislikeUser.indexOf(user_id) >= 0) {
+                res.send(400, "Removed");
+            } else {
+                removeFromLikeList(topic_id, user_id, res).then(dislikeTheTopic(topic_id, user_id, res));
+            }
+        }
+    }, function(error) {
+        res.send(error);
+    });
+}
 
 // 加载某个帖子的详情
 router.getTopicDetail = function(req, res) {
@@ -65,7 +116,6 @@ router.getUserTopics = function(req, res){
 // 用户发一个新帖子
 router.addNewTopic = function(req, res){
     var input = req.body;
-    console.log(input);
     var topic = new Topic();
     topic.UserID = req.params.user_id;
     topic.CreatedAt = new Date();

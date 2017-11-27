@@ -14,27 +14,19 @@ var article = require('./routes/article');
 var articleDraft = require('./routes/article-draft');
 var privateMessage = require('./routes/private-message');
 
+var mongoose = require('mongoose');
+var uri = "mongodb://127.0.0.1:27017/thepowersouldb";
+mongoose.connect(uri);
+var db = mongoose.connection;
+
+db.on('error',function(err){
+    console.log('connection error', err);
+});
+db.once('openUri',function(){
+    console.log('connected to database');
+});
+
 var app = express();
-
-// app.all('*', function(req, res, next) {
-//     // add details of what is allowed in HTTP request headers to the response headers
-//     res.header('Access-Control-Allow-Origin', '*');
-//     res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
-//     res.header('Access-Control-Allow-Credentials', false);
-//     res.header('Access-Control-Max-Age', '1000');
-//     res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding');
-//     // the next() function continues execution and will move onto the requested URL/URI
-//     next();
-// });
-
-// app.all('*', function(req, res, next) {  
-//   res.header("Access-Control-Allow-Origin", "*");  
-//   res.header("Access-Control-Allow-Headers", "X-Requested-With");  
-//   res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");  
-//   res.header("X-Powered-By",' 3.2.1')  
-//   res.header("Content-Type", "application/json;charset=utf-8");  
-//   next();  
-// });  
 
 app.use(cors());
 
@@ -72,6 +64,7 @@ app.post('/topic', topic.getTopics);
 app.get('/topic/:user_id', topic.getUserTopics);
 app.get('/topic/:user_id/:topic_id', topic.getTopicDetail);
 app.post('/topic/:user_id', topic.addNewTopic);
+app.put('/topic/:user_id/:topic_id/:operation_type', topic.likeOrDislike);
 app.delete('/topic/:topic_id', topic.deleteTopic);
 
 //comment
@@ -82,13 +75,16 @@ app.put('/comment/:user_id/:comment_id/:operation_type', comment.likeOrDislike);
 app.delete('/comment/:comment_id', comment.deleteComment);
 
 // article
-app.get('/article/:user_id', article.getUserArticles);
+app.get('/article/:article_id', article.getArticle);
+app.get('/articles/:user_id', article.getUserArticles);
 app.post('/article/:user_id', article.addNewArticle);
 app.delete('/article/:article_id', article.deleteArticle);
 
 // article draft
-app.get('/article-draft/:user_id', articleDraft.getUserArticleDrafts);
+app.get('/article-draft/:article_draft_id', articleDraft.getArticleDraft);
+app.get('/article-drafts/:user_id', articleDraft.getUserArticleDrafts);
 app.post('/article-draft/:user_id', articleDraft.addNewArticleDraft);
+app.put('/article-draft/:article_draft_id',articleDraft.updateArticleDraft);
 app.delete('/article-draft/:article_draft_id', articleDraft.deleteArticleDraft);
 
 // private message

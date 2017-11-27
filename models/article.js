@@ -6,7 +6,7 @@ var ArticleSchema = new mongoose.Schema({
     	Category: String,
     	CreatedAt: Date,
     	Author: String,
-   	    Like: Number,
-   	    Dislike: Number
+   	    LikeUser: [],
+   	    DislikeUser: []
 });
 module.exports = mongoose.model('Article', ArticleSchema);

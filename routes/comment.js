@@ -6,7 +6,6 @@ var uuid = require('node-uuid');
 function likeTheComment(comment_id, user_id, res) {
     var likeCommentPromise = Comment.update({_id: comment_id}, {$push: {"LikeUser": user_id}});
     likeCommentPromise.then(function(data) {
-        console.log("add-like")
         res.send(200, data);
     }, function(error) {
         res.send(error);
@@ -16,7 +15,6 @@ function likeTheComment(comment_id, user_id, res) {
 function dislikeTheComment(comment_id, user_id, res) {
     var dislikeCommentPromise = Comment.update({_id: comment_id}, {$push: {"DislikeUser": user_id}});
     dislikeCommentPromise.then(function(data) {
-        console.log("add-dislike")
         res.send(200, data);
     }, function(error) {
         res.send(error);
@@ -26,7 +24,6 @@ function dislikeTheComment(comment_id, user_id, res) {
 function removeFromLikeList(comment_id, user_id, res) {
     var removeLikeCommentPromise = Comment.update({_id: comment_id}, {$pull: {"LikeUser": user_id}});
     return removeLikeCommentPromise.then(function(data) {
-        console.log("dd-remove-like");
     }, function(error) {
         res.send(error);
     });
@@ -35,7 +32,6 @@ function removeFromLikeList(comment_id, user_id, res) {
 function removeFromDislikeList(comment_id, user_id, res) {
     var removeDislikeCommentPromise = Comment.update({_id: comment_id}, {$pull: {"DislikeUser": user_id}});
     return removeDislikeCommentPromise.then(function(data) {
-        console.log("dd-remove-dislike");
     }, function(error) {
         res.send(error);
     });
@@ -111,7 +107,7 @@ router.addNewComment = function(req, res){
     comment.TopicID = req.params.topic_id;
     comment.CreatedAt = new Date();
     comment.Content = input.Comment;
-    comment.Title = input.Title;
+    // comment.Title = input.Title;
     comment.TargetAuthor = input.TargetAuthor; // 回复的对象
     comment.Author = input.Author;
     comment.Like = 0;
@@ -128,7 +124,7 @@ router.addNewComment = function(req, res){
 router.deleteComment = function(req, res){
     var deleteCommentPromise = Comment.findByIdAndRemove(req.params.comment_id);
     deleteCommentPromise.then(function(data) {
-        res.json({message: "Delete comment successfully"});
+        res.json(200, data);
     }, function(error) {
         res.send(error);
     });

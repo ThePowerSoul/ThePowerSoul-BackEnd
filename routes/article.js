@@ -2,10 +2,33 @@ var Article = require('../models/article');
 var express = require('express');
 var router = express.Router();
 
+function likeTheArticle(article_id, user_id, res) {
+    var likeArticlePromise = Article.update({_id: article_id}, {$push: {"LikeUser": user_id}});
+    likeArticlePromise.then(function(data) {
+        res.send(200, data);
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+router.likeTheArticle = function(req, res) {
+    var user_id = req.params.user_id;
+    var article_id = req.params.article_id;
+    var findArticlePromise = Article.find({_id: article_id});
+    findArticlePromise.then(function(data){
+        if (data[0].LikeUser.indexOf(user_id) >= 0) {
+            res.send(400, "Added");
+        } else {
+            likeTheArticle(article_id, user_id, res);
+        }
+    }, function(error) {
+        res.send(error);
+    });
+}
+
 router.getUserArticles = function(req, res){
     var getUserArticlesPromise =  Article.find({UserID: req.params.user_id});
     getUserArticlesPromise.then(function(data) {
-        console.log(data);
         res.send(200, data);
     }, function(error) {
         res.send(error);
@@ -15,7 +38,11 @@ router.getUserArticles = function(req, res){
 router.getArticle = function(req, res) {
     var getArticlePromise =  Article.find({_id: req.params.article_id});
     getArticlePromise.then(function(data) {
-        res.send(200, data);
+        if (data.length > 0) {
+            res.send(200, data[0]);
+        } else {
+            res.send(404, "ArticleNotFound");
+        }
     }, function(error) {
         res.send(error);
     });

@@ -2,6 +2,56 @@ var User = require('../models/user');
 var express = require('express');
 var router = express.Router();
 
+router.addTopicToFav = function(req, res) {
+    var user_id = req.params.user_id;
+    var topic_id = req.params.topic_id;
+    var findUserPromise = User.find({_id: user_id});
+    findUserPromise.then(function(data) {
+        if (data.length > 0) {
+            var user = data[0];
+            if (user.FavTopics.indexOf(topic_id) >= 0) {
+                res.send(400, "Added");
+            } else {
+                var addToUserTopicFavPromise = User.update({id: user_id}, {$push: {"FavTopics": topic_id}});
+                addToUserTopicFavPromise.then(function(data) {
+                    res.send(200, data);
+                }, function(error) {
+                    res.send(error);
+                });
+            }
+        } else {
+            res.send(404, "UserNotFound");
+        }
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+router.addArticleToFav = function(req, res) {
+    var user_id = req.params.user_id;
+    var topic_id = req.params.topic_id;
+    var findUserPromise = User.find({_id: user_id});
+    findUserPromise.then(function(data) {
+        if (data.length > 0) {
+            var user = data[0];
+            if (user.FavTopics.indexOf(topic_id) >= 0) {
+                res.send(400, "Added");
+            } else {
+                var addToUserArticleFavPromise = User.update({id: user_id}, {$push: {"FavArticles": topic_id}});
+                addToUserArticleFavPromise.then(function(data) {
+                    res.send(200, data);
+                }, function(error) {
+                    res.send(error);
+                });
+            }
+        } else {
+            res.send(404, "UserNotFound");
+        }
+    }, function(error) {
+        res.send(error);
+    });
+}
+
 /*
     获得目标用户信息
     判断是否在当前用户关注列表中

@@ -13,6 +13,8 @@ var UserSchema = new mongoose.Schema({
     VerifiedCategory: String, // 认证分类，个人或组织
     IsAdmin: Boolean, // 是否是管理员
     PhoneNumber: String, // 未验证的手机
-    VerifiedPhoneNumber: String // 验证的手机， 理论上同上
+    VerifiedPhoneNumber: String, // 验证的手机， 理论上同上
+    FavTopics: [], // 收藏的帖子
+    FavArticles: [] // 收藏的文章
 });
 module.exports = mongoose.model('User',UserSchema);

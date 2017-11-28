@@ -3,6 +3,9 @@ var express = require('express');
 var uuid = require('node-uuid');
 var router = express.Router();
 
+/*
+ * 赞帖子
+ */
 function likeTheTopic(topic_id, user_id, res) {
     var likeTopicPromise = Topic.update({_id: topic_id}, {$push: {"LikeUser": user_id}});
     likeTopicPromise.then(function(data) {
@@ -13,6 +16,9 @@ function likeTheTopic(topic_id, user_id, res) {
     });
 }
 
+/*
+ * 踩帖子
+ */
 function dislikeTheTopic(topic_id, user_id, res) {
     var dislikeTopicPromise = Topic.update({_id: topic_id}, {$push: {"DislikeUser": user_id}});
     dislikeTopicPromise.then(function(data) {
@@ -136,8 +142,8 @@ router.addNewTopic = function(req, res){
 // 删除一个帖子
 router.deleteTopic = function(req, res){
     var deleteTopicPromise = Topic.findByIdAndRemove(req.params.topic_id);
-    deleteTopicPromise.then(function(result) {
-        res.json({message: "Delete topic successfully"});
+    deleteTopicPromise.then(function(data) {
+        res.send(200, data);
     }, function(error) {
         res.send(error);
     });

@@ -56,6 +56,8 @@ app.post('/users', user.getUsers);
 app.get('/user-detail/:user_id/:target_id', user.getFollowingStatus);
 app.put('/user-follow/:user_id/:target_id', user.addToFollowing);
 app.put('/user-unfollow/:user_id/:target_id', user.removeFromFollowing);
+app.put('/user-topic-fav/:user_id/:topic_id', user.addTopicToFav);
+app.put('/user-article-fav/:user_id/:topic_id', user.addArticleToFav);
 app.post('/login', user.login);
 app.post('/signup', user.signUp);
 
@@ -78,6 +80,7 @@ app.delete('/comment/:comment_id', comment.deleteComment);
 app.get('/article/:article_id', article.getArticle);
 app.get('/articles/:user_id', article.getUserArticles);
 app.post('/article/:user_id', article.addNewArticle);
+app.put('/article/:user_id/:article_id', article.likeTheArticle);
 app.delete('/article/:article_id', article.deleteArticle);
 
 // article draft

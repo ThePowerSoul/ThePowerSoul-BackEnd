@@ -54,6 +54,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.post('/users', user.getUsers);
 app.get('/user-detail/:user_id/:target_id', user.getFollowingStatus);
+app.get('/user-fav-topics/:user_id', user.getFavTopics);
+app.get('/user-fav-articles/:user_id', user.getFavArticles);
 app.put('/user-follow/:user_id/:target_id', user.addToFollowing);
 app.put('/user-unfollow/:user_id/:target_id', user.removeFromFollowing);
 app.put('/user-topic-fav/:user_id/:topic_id', user.addTopicToFav);

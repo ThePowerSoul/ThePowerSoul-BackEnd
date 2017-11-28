@@ -1,6 +1,41 @@
 var User = require('../models/user');
+var Topic = require('../models/topic');
+var Article = require('../models/article');
 var express = require('express');
 var router = express.Router();
+
+router.getFavTopics = function(req, res) {
+    var user_id = req.params.user_id;
+    var findUserPromise = User.find({_id: user_id});
+    findUserPromise.then(function(data) {
+        var user = data[0];
+        var findFavTopics = Topic.find({_id: {'$in': user.FavTopics}});
+        findFavTopics.then(function(data) {
+            res.send(200, data);
+        }, function(error) {    
+            res.send(error);
+        });
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+router.getFavArticles = function(req, res) {
+    var user_id = req.params.user_id;
+    var findUserPromise = User.find({_id: user_id});
+    findUserPromise.then(function(data) {
+        var user = data[0];
+        var findFavArticles = Article.find({_id: {'$in': user.FavArticles}});
+        findFavArticles.then(function(data) {
+            console.log(data);
+            res.send(200, data);
+        }, function(error) {    
+            res.send(error);
+        });
+    }, function(error) {
+        res.send(error);
+    });
+}
 
 router.addTopicToFav = function(req, res) {
     var user_id = req.params.user_id;
@@ -12,7 +47,7 @@ router.addTopicToFav = function(req, res) {
             if (user.FavTopics.indexOf(topic_id) >= 0) {
                 res.send(400, "Added");
             } else {
-                var addToUserTopicFavPromise = User.update({id: user_id}, {$push: {"FavTopics": topic_id}});
+                var addToUserTopicFavPromise = User.update({_id: user_id}, {$push: {"FavTopics": topic_id}});
                 addToUserTopicFavPromise.then(function(data) {
                     res.send(200, data);
                 }, function(error) {
@@ -29,15 +64,15 @@ router.addTopicToFav = function(req, res) {
 
 router.addArticleToFav = function(req, res) {
     var user_id = req.params.user_id;
-    var topic_id = req.params.topic_id;
+    var article_id = req.params.article_id;
     var findUserPromise = User.find({_id: user_id});
     findUserPromise.then(function(data) {
         if (data.length > 0) {
             var user = data[0];
-            if (user.FavTopics.indexOf(topic_id) >= 0) {
+            if (user.FavArticles.indexOf(article_id) >= 0) {
                 res.send(400, "Added");
             } else {
-                var addToUserArticleFavPromise = User.update({id: user_id}, {$push: {"FavArticles": topic_id}});
+                var addToUserArticleFavPromise = User.update({_id: user_id}, {$push: {"FavArticles": article_id}});
                 addToUserArticleFavPromise.then(function(data) {
                     res.send(200, data);
                 }, function(error) {

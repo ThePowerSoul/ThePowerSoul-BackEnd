@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 
 var index = require('./routes/index');
 var user = require('./routes/user');
@@ -27,15 +29,20 @@ db.once('openUri',function(){
 });
 
 var app = express();
-
+app.use(cookieParser());
 app.use(cors());
-
-app.use(function(req, res, next) {
-   res.header("Access-Control-Allow-Origin", "*");
-   res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
-   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-   next();
-});
+// app.use(function(req, res, next) {
+//    res.header("Access-Control-Allow-Origin", "*");
+//    res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
+//    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//    next();
+// });
+app.use(session({
+   secret: 'thepowersoul-session', // 建议使用随机值
+   cookie: ('name', 'value', {path: '/', httpOnly: true,secure: false, maxAge: 60000 }), // cookie保存时间
+   resave: true,
+   saveUninitialized: true
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -53,6 +60,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // user
 app.use('/', index);
 app.post('/users', user.getUsers);
+app.get('/user/:user_id', user.getUserDetail);
 app.get('/user-detail/:user_id/:target_id', user.getFollowingStatus);
 app.get('/user-fav-topics/:user_id', user.getFavTopics);
 app.get('/user-fav-articles/:user_id', user.getFavArticles);
@@ -93,7 +101,12 @@ app.put('/article-draft/:article_draft_id',articleDraft.updateArticleDraft);
 app.delete('/article-draft/:article_draft_id', articleDraft.deleteArticleDraft);
 
 // private message
-app.post('/private-message/:user_id/', privateMessage.sendPrivateMessage);
+app.get('/private-message-list/:user_id', privateMessage.getUserMessageList);
+app.get('/private-message/:user_id/:target_user_id', privateMessage.getUserMessageConversation);
+app.get('/private-message/:user_id', privateMessage.getUserPrivateMessage);
+app.put('/private-message/:user_id', privateMessage.markAllRead);
+app.post('/private-message/:user_id/:target_user_id', privateMessage.sendPrivateMessage);
+app.delete('/private-message/:user_id', privateMessage.deleteMessage);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

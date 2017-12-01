@@ -2,7 +2,17 @@ var User = require('../models/user');
 var Topic = require('../models/topic');
 var Article = require('../models/article');
 var express = require('express');
+var crypto = require('crypto');
 var router = express.Router();
+
+router.getUserDetail = function(req, res){
+    var user_id = req.params.user_id;
+    User.find({_id: user_id}).then(function(data) {
+        res.send(200, data[0]);
+    }, function(error) {
+        res.send(error);
+    });
+}
 
 router.getFavTopics = function(req, res) {
     var user_id = req.params.user_id;
@@ -27,7 +37,6 @@ router.getFavArticles = function(req, res) {
         var user = data[0];
         var findFavArticles = Article.find({_id: {'$in': user.FavArticles}});
         findFavArticles.then(function(data) {
-            console.log(data);
             res.send(200, data);
         }, function(error) {    
             res.send(error);
@@ -94,21 +103,24 @@ router.addArticleToFav = function(req, res) {
 router.getFollowingStatus = function(req, res) {
     var user_id = req.params.user_id;
     var target_id = req.params.target_id;
-    getFollowingStatusPromise = User.find({"$or": [{"_id": user_id}, {"_id": target_id}]});
-    getFollowingStatusPromise.then(function(data) {
-        var user = data[0];
-        var targetUser = data[1];
-        var obj = {};
-        obj.Data = data[1];
-        if (user.FollowingUsers.indexOf(targetUser._id) >= 0) {
-            obj.IsFollowing = true;
-        } else {
-            obj.IsFollowing = false;
-        }
-        res.send(obj);
+    getUserObjPromise = User.find({_id: user_id});
+    getUserObjPromise.then(function(user) {
+        var getTargetUserObjPromist = User.find({_id: target_id});
+        getTargetUserObjPromist.then(function(targetUser) {
+            var obj = {};
+            obj.Data = targetUser[0];
+            if (user[0].FollowingUsers.indexOf(targetUser[0]._id) >= 0) {
+                obj.IsFollowing = true;
+            } else {
+                obj.IsFollowing = false;
+            }
+            res.send(200, obj);
+        }, function(error) {    
+            res.send(error);
+        });
     }, function(error) {
         res.send(error);
-    }); 
+    });
 }
 
 /*
@@ -177,9 +189,11 @@ router.signUp = function(req, res){
                 } else {
                     // 创建新用户
                     var newUser = new User();
+                    var saltResult = "";
+                    var hashResult = "";
+                    var password = req.body.Password;
                     newUser.Name = req.body.Name;
                     newUser.DisplayName = req.body.DisplayName;
-                    newUser.HashedPassword = req.body.Password;
                     newUser.Email = req.body.Email;
                     newUser.CreatedAt = new Date();
                     newUser.AvatarID = "";
@@ -191,18 +205,34 @@ router.signUp = function(req, res){
                     newUser.PhoneNumber = "";
                     newUser.VerifiedPhoneNumber = "";
                     newUser.FollowingUsers = [];
-                    var addNewUserPromise = newUser.save();
-                    addNewUserPromise.then(function(data) { // 注册成功
-                        res.send(200, {
-                            Name: newUser.Name,
-                            DisplayName: newUser.DisplayName,
-                            Email: newUser.Email,
-                            Point: newUser.Point,
-                            _id: data._id
+                    newUser.MostRecentConversation = [];
+                    newUser.FavTopics = [];
+                    newUser.FavArticles = [];
+                    crypto.randomBytes(128, function(error, salt) {
+                        if (error) {
+                            throw error;
+                        }
+                        saltResult = salt.toString('hex'); // 得到salt
+                        newUser.Salt = saltResult;
+                        crypto.pbkdf2(password, saltResult, 4096, 256, 'sha512', function (error,hash) {
+                            if (error) { throw error; }
+                            hashResult = hash.toString('hex'); //生成密文
+                            newUser.HashedPassword = hashResult;
+                            // save new user
+                            var addNewUserPromise = newUser.save();
+                            addNewUserPromise.then(function(data) { // 注册成功
+                                res.send(200, {
+                                    Name: newUser.Name,
+                                    DisplayName: newUser.DisplayName,
+                                    Email: newUser.Email,
+                                    Point: newUser.Point,
+                                    _id: data._id
+                                });
+                            }, function(error) {
+                                res.send(error);
+                            });
                         });
-                    }, function(error) {
-                        res.send(error);
-                    });
+                    });                    
                 }
             }, function(error) {
                 res.send(error);
@@ -222,22 +252,34 @@ router.login = function(req,res){
     var email = input.Email;
     var password = input.Password;
     // 检查用户名是否合法
-    console.log(req.body);
     var getUserInstancePromise = User.find({Email: email});
     getUserInstancePromise.then(function(data) {
         if (data.length > 0) {
             // 检查密码是否正确
-            if (data[0].HashedPassword === password) {
-                res.send(200, {
-                    Name: data[0].Name,
-                    DisplayName: data[0].DisplayName,
-                    Email: data[0].Email,
-                    Point: data[0].Point,
-                    _id: data[0]._id
-                });
-            } else {
-                res.send(400, '密码错误，请重新输入');
-            }
+            crypto.pbkdf2(password, data[0].Salt, 4096, 256, 'sha512', function (error, hash) {
+                if (error) { throw error; }
+                if (hash.toString('hex') === data[0].HashedPassword) {
+                    // req.session[data[0]._id] = data[0];
+                    // res.cookie('tps', data[0]._id, 
+                    //     {
+                    //         expires: new Date(Date.now() + 600000), 
+                    //         httpOnly: false,
+                    //         domain: false
+                    //     }
+                    // );
+                    // res.send(200);
+                    res.send(200, {
+                        Name: data[0].Name,
+                        DisplayName: data[0].DisplayName,
+                        Email: data[0].Email,
+                        Point: data[0].Point,
+                        _id: data[0]._id
+                    });
+                   
+                } else {
+                    res.send(400, '密码错误，请重新输入');
+                }
+            });
         } else { // 用户名不存在
             res.send(400, '该用户不存在');
         }

@@ -5,7 +5,37 @@ var express = require('express');
 var crypto = require('crypto');
 var router = express.Router();
 
-router.getUserDetail = function(req, res){
+// 获取关注用户发的帖子，文章，关注的帖子
+router.getFollowingTopicsAndArticles = function(req, res) {
+    var user_id = req.params.user_id;
+    User.find({_id: user_id}).then(function(data) {
+        var topisAndArticles = [];
+        var followingUsers = data[0].FollowingUsers;
+        followingUsers.forEach(function(user_idm, index) {
+            targetUser = User.find({_id: user_id}).then(function(data) {
+                Topic.find({'$or': [{UserID: user_id}, {_id: {'$in': data[0].FollowedTopics}}]}).then(function(data) {
+                    topisAndArticles.push(data);
+                    Article.find({UserID: user_id}).then(function(data) {
+                        topisAndArticles.push(data);
+                        if (index === followingUsers.length) {
+                            res.send(200, topisAndArticles);
+                        }
+                    }, function(error) {
+                        res.send(error);
+                    });
+                }, function(error) {    
+                    res.send(error);
+                });
+            }, function(error) {
+                res.send(error);
+            });
+        });
+    }, function(error) {
+        res.send(error);
+    });
+}
+
+router.getUserDetail = function(req, res) {
     var user_id = req.params.user_id;
     User.find({_id: user_id}).then(function(data) {
         res.send(200, data[0]);

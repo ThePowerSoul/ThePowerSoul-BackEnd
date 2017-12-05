@@ -15,6 +15,7 @@ var UserSchema = new mongoose.Schema({
     IsAdmin: Boolean, // 是否是管理员
     PhoneNumber: String, // 未验证的手机
     VerifiedPhoneNumber: String, // 验证的手机， 理论上同上
+    FollowedTopics: [], // 关注的帖子
     FavTopics: Array, // 收藏的帖子
     FavArticles: Array, // 收藏的文章
     MostRecentConversation: Array // 最近一次和其他用户对话的消息记录id，key为目标用户id，value为消息id

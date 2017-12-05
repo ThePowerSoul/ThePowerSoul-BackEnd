@@ -15,6 +15,7 @@ var comment = require('./routes/comment');
 var article = require('./routes/article');
 var articleDraft = require('./routes/article-draft');
 var privateMessage = require('./routes/private-message');
+var complaintMessage = require('./routes/complaint-message');
 
 var mongoose = require('mongoose');
 var uri = "mongodb://127.0.0.1:27017/thepowersouldb";
@@ -64,6 +65,7 @@ app.get('/user/:user_id', user.getUserDetail);
 app.get('/user-detail/:user_id/:target_id', user.getFollowingStatus);
 app.get('/user-fav-topics/:user_id', user.getFavTopics);
 app.get('/user-fav-articles/:user_id', user.getFavArticles);
+app.get('/user-following-topics-articles', user.getFollowingTopicsAndArticles);
 app.put('/user-follow/:user_id/:target_id', user.addToFollowing);
 app.put('/user-unfollow/:user_id/:target_id', user.removeFromFollowing);
 app.put('/user-topic-fav/:user_id/:topic_id', user.addTopicToFav);
@@ -107,6 +109,10 @@ app.put('/private-message/:user_id/:target_user_id', privateMessage.markReadBetw
 app.put('/private-message/:user_id', privateMessage.markAllRead);
 app.post('/private-message/:user_id/:target_user_id', privateMessage.sendPrivateMessage);
 app.delete('/private-message/:user_id/:message_id', privateMessage.deleteMessage);
+
+app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
+app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);
+app.put('/complaint-message/:message_id' ,complaintMessage.setRead);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

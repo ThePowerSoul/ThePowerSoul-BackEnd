@@ -90,13 +90,10 @@ router.getTopics = function(req, res) {
     var category = input.Category;
     var keyword = input.Keyword;
     var LoadAll = input.LoadAll;
-    if (LoadAll) {
-        // 没有类别筛选
-        // 直接根据关键字筛选
-        if (keyword !== '') {
-            // 根据关键字筛选后，再根据页数筛选
-        } else {
-            // 直接根据页数筛选
+    if (LoadAll) { // 没有类别筛选, 直接根据关键字筛选
+        if (keyword !== '') { // 根据关键字筛选后，再根据页数筛选
+            
+        } else { // 直接根据页数筛选
             var getTopicsPromise = Topic.find();
             getTopicsPromise.then(function(data) {
                 res.json(data);
@@ -104,8 +101,8 @@ router.getTopics = function(req, res) {
                 res.send(err);
             });
         }
-    } else {
-        // 有类别筛选
+    } else { // 首个筛选筛选条件： 类别
+        
     }
 }
 

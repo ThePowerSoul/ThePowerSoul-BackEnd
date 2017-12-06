@@ -1,6 +1,6 @@
 var PrivateMessage = require('../models/private-message');
-var express = require('express');
 var User = require('../models/user');
+var express = require('express');
 var router = express.Router();
 
 // 获取用户之间的对话
@@ -17,21 +17,10 @@ router.getUserMessageConversation = function(req, res) {
     });
 }
 
-// 将某条信息标识为已读
-router.markSingleMessage = function(req, res) {
-    var user_id = req.params.user_id;
-    var markUserSingleMessagePromise = PrivateMessage.update({TargetUserID: user_id}, {'$set': {'Status': 1}});
-    markUserSingleMessagePromise.then(function(data) {
-        res.send(200, data);
-    }, function(error) {
-        res.send(error);
-    });
-};
-
 // 将一用户全部未读标记为已读
 router.markAllRead = function(req, res) {
     var user_id = req.params.user_id;
-    var markUserPrivateMessagePromise = PrivateMessage.update({TargetUserID: user_id}, {'$set': {'Status': 1}});
+    var markUserPrivateMessagePromise = PrivateMessage.update({TargetUserID: user_id}, {'$set': {'Status': 1}}, {multi: true});
     markUserPrivateMessagePromise.then(function(data) {
         res.send(200, data);
     }, function(error) {
@@ -81,6 +70,62 @@ router.getUserPrivateMessage = function(req, res) {
     }, function(error) {
         res.send(error);
     });
+}
+
+// 用户单方面删除和另一个用户的所有私信
+router.deleteAllMessageInConversation = function(req, res) {
+    var user_id = req.params.user_id;
+    var target_user_id = req.params.target_user_id;
+    /******************* 更新对应所有私信的当前用户这一边的状态 ****************/
+    PrivateMessage.find({'$or': 
+    [{UserID: user_id, TargetUserID: target_user_id},
+    {UserID: target_user_id, TargetUserID: user_id}]})
+        .then(function(data) {
+            for(var i = 0; i < data.length; i++) {
+                var message = data[i];
+                if (message.UserID === user_id && message.UserDelStatus === false) {
+                    PrivateMessage.update({_id: message._id}, {'$set': {'UserDelStatus': true}})
+                        .then(function(data) {
+                            //
+                        }, function(error) {
+                            res.send(error);
+                        });
+                } else if (message.TargetUserID === user_id && message.TargetUserDelStatus === false) {
+                    PrivateMessage.update({_id: message._id}, {'$set': {'TargetUserDelStatus': true}})
+                        .then(function(data) {
+                            //
+                        }, function(error) {
+                            res.send(error);
+                        });
+                }
+            }
+            /******************* 更新recent conversation ****************/
+            User.find({_id: user_id}).then(function(data){
+                var user = data[0];
+                var index = null;
+                for (var i = 0; i < user.MostRecentConversation.length; i++) {
+                    var message = user.MostRecentConversation[i];
+                    if (message.SenderID === user_id || message.TargetID === user_id) {
+                        index = i;
+                    }
+                }
+                if (index !== null) {
+                    user.MostRecentConversation.splice(index, 1);
+                    User.update({_id: user_id}, {'$set': {'MostRecentConversation': user.MostRecentConversation}})
+                        .then(function(data) {
+                            res.send(200, data);
+                        }, function(error){
+                            res.send(error);
+                        }); 
+                } else {
+                    res.send(200);
+                }
+            }, function(error) {
+                res.send(error);
+            });
+        }, function(error) {
+            res.send(error);
+        });
 }
 
 // 删除私信
@@ -142,7 +187,8 @@ router.deleteMessage = function(req, res) {
                                                         Content: message.Content,
                                                         SenderName: message.UserName,
                                                         ReceiverName: message.TargetUserName,
-                                                        Status: '0'
+                                                        Status: '0',
+                                                        CreatedAt: new Date()
                                                     }
                                                     console.log(newObj, 777);
                                                     userRecentConverstaion.splice(index, 0, newObj);
@@ -163,7 +209,8 @@ router.deleteMessage = function(req, res) {
                                                         Content: message.Content,
                                                         SenderName: message.TargetUserName,
                                                         ReceiverName: message.UserName,
-                                                        Status: '0'
+                                                        Status: '0',
+                                                        CreatedAt: new Date()
                                                     }
                                                     userRecentConverstaion.splice(index, 0, newObj);
                                                     console.log(userRecentConverstaion, 888);
@@ -240,7 +287,8 @@ router.sendPrivateMessage = function(req, res){
                 Content: req.body.Content,
                 SenderName: req.body.UserName,
                 ReceiverName: req.body.TargetUserName,
-                Status: '0'
+                Status: '0',
+                CreatedAt: new Date()
             };
             if (index !== null) {
                 data[0].MostRecentConversation.splice(index, 1);
@@ -269,7 +317,8 @@ router.sendPrivateMessage = function(req, res){
                     Content: req.body.Content,
                     SenderName: req.body.UserName,
                     ReceiverName: req.body.TargetUserName,
-                    Status: '0'
+                    Status: '0',
+                    CreatedAt: new Date()
                 };
                 if (index !== null) {
                     data[0].MostRecentConversation.splice(index, 1);

@@ -107,12 +107,9 @@ app.get('/private-message/:user_id/:target_user_id', privateMessage.getUserMessa
 app.get('/private-message/:user_id', privateMessage.getUserPrivateMessage);
 app.put('/private-message/:user_id/:target_user_id', privateMessage.markReadBetweenTwoUsers);
 app.put('/private-message/:user_id', privateMessage.markAllRead);
+app.put('/delete-conversation/:user_id/:target_user_id', privateMessage.deleteAllMessageInConversation);
 app.post('/private-message/:user_id/:target_user_id', privateMessage.sendPrivateMessage);
 app.delete('/private-message/:user_id/:message_id', privateMessage.deleteMessage);
-
-app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
-app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);
-app.put('/complaint-message/:message_id' ,complaintMessage.setRead);
 
 app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
 app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);

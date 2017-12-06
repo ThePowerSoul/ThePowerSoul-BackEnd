@@ -18,6 +18,6 @@ var UserSchema = new mongoose.Schema({
     FollowedTopics: [], // 关注的帖子
     FavTopics: Array, // 收藏的帖子
     FavArticles: Array, // 收藏的文章
-    MostRecentConversation: Array // 最近一次和其他用户对话的消息记录id，key为目标用户id，value为消息id
+    MostRecentConversation: Array // 最近一次和其他用户对话的消息记录id，key为目标用户id
 });
 module.exports = mongoose.model('User', UserSchema);

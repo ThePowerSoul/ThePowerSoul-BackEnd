@@ -226,7 +226,10 @@ router.sendPrivateMessage = function(req, res){
         findUserPromise.then(function(data) {
             var index = null;
             data[0].MostRecentConversation.forEach(function(item, i) {
-                if (item.TargetID === target_user_id && item.SenderID === user_id) {
+                if (
+                    (item.TargetID === target_user_id && item.SenderID === user_id) ||
+                    (item.TargetID === user_id && item.SenderID === target_user_id)
+                    ) {
                     index = i;
                 }
             });
@@ -254,7 +257,8 @@ router.sendPrivateMessage = function(req, res){
             findAnotherUserPromise.then(function(data) {
                 var index = null;
                 data[0].MostRecentConversation.forEach(function(item, i) {
-                    if (item.TargetID === target_user_id && item.SenderID === user_id) {
+                    if ((item.TargetID === target_user_id && item.SenderID === user_id) ||
+                        (item.TargetID === user_id && item.SenderID === target_user_id)) {
                         index = i;
                     }
                 });

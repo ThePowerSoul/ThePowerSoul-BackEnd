@@ -103,12 +103,16 @@ app.put('/article-draft/:article_draft_id',articleDraft.updateArticleDraft);
 app.delete('/article-draft/:article_draft_id', articleDraft.deleteArticleDraft);
 
 // private message
-app.get('/private-message-list/:user_id', privateMessage.getUserMessageList);
 app.get('/private-message/:user_id/:target_user_id', privateMessage.getUserMessageConversation);
 app.get('/private-message/:user_id', privateMessage.getUserPrivateMessage);
+app.put('/private-message/:user_id/:target_user_id', privateMessage.markReadBetweenTwoUsers);
 app.put('/private-message/:user_id', privateMessage.markAllRead);
 app.post('/private-message/:user_id/:target_user_id', privateMessage.sendPrivateMessage);
-app.delete('/private-message/:user_id', privateMessage.deleteMessage);
+app.delete('/private-message/:user_id/:message_id', privateMessage.deleteMessage);
+
+app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
+app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);
+app.put('/complaint-message/:message_id' ,complaintMessage.setRead);
 
 app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
 app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);

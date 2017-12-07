@@ -29,6 +29,9 @@ function dislikeTheTopic(topic_id, user_id, res) {
     });
 }
 
+/*
+ * 
+ */
 function removeFromLikeList(topic_id, user_id, res) {
     var removeLikeTopicPromise = Topic.update({_id: topic_id}, {$pull: {"LikeUser": user_id}});
     return removeLikeTopicPromise.then(function(data) {
@@ -38,6 +41,9 @@ function removeFromLikeList(topic_id, user_id, res) {
     });
 }
 
+/*
+ * 
+ */
 function removeFromDislikeList(topic_id, user_id, res) {
     var removeDislikeTopicPromise = Topic.update({_id: topic_id}, {$pull: {"DislikeUser": user_id}});
     return removeDislikeTopicPromise.then(function(data) {
@@ -47,7 +53,10 @@ function removeFromDislikeList(topic_id, user_id, res) {
     });
 }
 
-// 点赞或者取消赞
+
+/*
+ * 点赞或者取消赞
+ */
 router.likeOrDislike = function(req, res) {
     var user_id = req.params.user_id;
     var topic_id = req.params.topic_id;
@@ -72,7 +81,9 @@ router.likeOrDislike = function(req, res) {
     });
 }
 
-// 加载某个帖子的详情
+/*
+ * 加载某个帖子的详情
+ */
 router.getTopicDetail = function(req, res) {
     var topic_id = req.params.topic_id;
     var getTopicDetailPromise = Topic.find({_id: topic_id});
@@ -83,7 +94,9 @@ router.getTopicDetail = function(req, res) {
     });
 }
 
-// 首页根据条件加载帖子列表，后端分页
+/*
+ * 首页根据条件加载帖子列表，后端分页
+ */
 router.getTopics = function(req, res) {
     var input = req.body;
     var pageNum = input.Page;
@@ -106,7 +119,28 @@ router.getTopics = function(req, res) {
     }
 }
 
-// 找到对应用户发的所有帖子
+/*
+ * 获取用户关注的帖子
+ */
+router.getUserFollowedTopics = function(req, res) {
+    var user_id = req.params.user_id;
+    User.find({_id: user_id})
+        .then(function(data) {
+            var topicIDs = data[0].FollowedTopics;
+            Topic.find({_id: topicIDs})
+                .then(function(data) {
+                    res.send(200, data);
+                }, function(error) {
+                    res.send(error);
+                });
+        }, function(error) {
+            res.send(error);
+        });
+}
+
+/*
+ * 找到对应用户发的所有帖子 
+ */
 router.getUserTopics = function(req, res){
     var getUserTopicsPromise = Topic.find({UserID: req.params.user_id});
     getUserTopicsPromise.then(function(data) {
@@ -116,7 +150,9 @@ router.getUserTopics = function(req, res){
     });
 }
 
-// 用户发一个新帖子
+/*
+ * 用户发一个新帖子
+ */
 router.addNewTopic = function(req, res){
     var input = req.body;
     var topic = new Topic();
@@ -136,7 +172,9 @@ router.addNewTopic = function(req, res){
     });
 }
 
-// 删除一个帖子
+/*
+ * 删除一个帖子
+ */
 router.deleteTopic = function(req, res){
     var deleteTopicPromise = Topic.findByIdAndRemove(req.params.topic_id);
     deleteTopicPromise.then(function(data) {

@@ -5,7 +5,7 @@ var express = require('express');
 var crypto = require('crypto');
 var router = express.Router();
 
-// 获取关注用户发的帖子，文章，关注的帖子
+// 获取关注用户发的帖子，文章，关注的人的的帖子
 router.getFollowingTopicsAndArticles = function(req, res) {
     var user_id = req.params.user_id;
     User.find({_id: user_id}).then(function(data) {
@@ -35,6 +35,94 @@ router.getFollowingTopicsAndArticles = function(req, res) {
     });
 }
 
+/********************** 初始化加载
+ * 								我关注的话题
+ * 								我关注的人关注的帖子信息
+ * 								我关注的人发表的帖子
+ *           
+ * 								去重
+ * 	 ********************/
+router.getFollowingTopicsAndFollowingUsersFollowingTopics = function(req, res) {
+    var user_id = req.params.user_id;
+    var topics = [];
+    User.find({_id: user_id})
+        .then(function(data) {
+            var user = data[0];
+            var usersFollowingUsers = user.FollowingUsers; // 当前用户正在关注的用户们
+            Topic.find({_id: {'$in': user.FollowedTopics}}) // 当前用户正在关注的帖子
+                .then(function(data) {
+                    topics = topics.concat(data);
+                    Topic.find({UserID: {'$in': usersFollowingUsers}}) // 当前用户正在关注的用户们发的帖子
+                    .then(function(data) {
+                        topics = topics.concat(data);
+                    }, function(error) {    
+                        res.send(error);
+                    });
+                    for (var i = 0; i < usersFollowingUsers.length; i++) {
+                        User.find({_id: usersFollowingUsers[i]})
+                            .then(function(data) {
+                                Topic.find({_id: {'$in': data[0].FollowedTopics}}) // 当前用户关注的用户们正在关注的帖子
+                                    .then(function(data) {
+                                        topics = topics.concat(data);
+                                    }, function(error) {
+                                        res.send(error);
+                                    });
+                            }, function(error) {
+                                res.send(error);
+                            });
+                    }
+                    topics = removeSameElementInArr(topics); // 去重
+                    res.send(200, topics);
+                }, function(error) {
+                    res.send(error);
+                });
+        }, function(error) {
+            res.send(error);
+        });
+}
+
+/*  
+    获取我关注的用户们发的文章
+*/
+router.getFollowingUsersArticles = function(req, res) {
+    var user_id = req.params.user_id;
+    var articles = [];
+    User.find({_id: user_id})
+        .then(function(data) {
+            var users = User.find({_id: {'$in': data[0].FollowingUsers}})
+                .then(function(data) {
+                    for(var i = 0; i < data.length; i++) {
+                        Article.find({UserID: data[i]._id})
+                            .then(function(data) {
+                                articles = articles.concat(data);
+                            }, function(error) {
+                                res.send(error);
+                            });
+                    }
+                    res.send(200, data);
+                }, function(error) {
+                    res.send(error);
+                });
+        }, function(error) {
+            res.send(error);
+        });
+}
+
+function removeSameElementInArr(arr) {
+    var res = [];
+    var json = {};
+    for(var i = 0; i < arr.length; i++){
+        if(!json[arr[i]]){
+            res.push(arr[i]);
+            json[arr[i]] = 1;
+        }
+    }
+    return res;
+}
+
+/*  
+    获取用户信息
+*/
 router.getUserDetail = function(req, res) {
     var user_id = req.params.user_id;
     User.find({_id: user_id}).then(function(data) {
@@ -44,6 +132,9 @@ router.getUserDetail = function(req, res) {
     });
 }
 
+/*  
+    获得喜欢的帖子
+*/
 router.getFavTopics = function(req, res) {
     var user_id = req.params.user_id;
     var findUserPromise = User.find({_id: user_id});
@@ -60,6 +151,9 @@ router.getFavTopics = function(req, res) {
     });
 }
 
+/*  
+    获得喜欢的文章
+*/
 router.getFavArticles = function(req, res) {
     var user_id = req.params.user_id;
     var findUserPromise = User.find({_id: user_id});
@@ -76,6 +170,9 @@ router.getFavArticles = function(req, res) {
     });
 }
 
+/*  
+    将帖子添加到喜欢
+*/
 router.addTopicToFav = function(req, res) {
     var user_id = req.params.user_id;
     var topic_id = req.params.topic_id;
@@ -101,6 +198,9 @@ router.addTopicToFav = function(req, res) {
     });
 }
 
+/*  
+    将文章添加到喜欢
+*/
 router.addArticleToFav = function(req, res) {
     var user_id = req.params.user_id;
     var article_id = req.params.article_id;

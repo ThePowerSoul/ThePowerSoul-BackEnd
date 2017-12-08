@@ -5,6 +5,28 @@ var express = require('express');
 var crypto = require('crypto');
 var router = express.Router();
 
+// 获取用户发的帖子数量和文章数量
+router.getUserTopicAndArticleNumber = function(req, res) {
+    var user_id = req.params.user_id;
+    var result = {
+        TopicNumber: 0,
+        ArticleNumber: 0
+    }
+    Topic.find({UserID: user_id})
+        .then(function(data) {
+            result.TopicNumber = data.length;
+            Article.find({UserID: user_id})
+                .then(function(data) {
+                    result.ArticleNumber = data.length;
+                    res.send(200, result);
+                }, function(error) {
+                    res.send(error);
+                }); 
+        }, function(error) {
+            res.send(error);
+        });
+}
+
 // 获取关注用户发的帖子，文章，关注的人的的帖子
 router.getFollowingTopicsAndArticles = function(req, res) {
     var user_id = req.params.user_id;

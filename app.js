@@ -67,6 +67,7 @@ app.get('/user-followed-articles/:user_id', user.getFollowingUsersArticles);
 app.get('/user-detail/:user_id/:target_id', user.getFollowingStatus);
 app.get('/user-fav-topics/:user_id', user.getFavTopics);
 app.get('/user-fav-articles/:user_id', user.getFavArticles);
+app.get('/get-publish-number/:user_id', user.getUserTopicAndArticleNumber);
 // app.get('/user-following-topics-articles', user.getFollowingTopicsAndArticles);
 app.put('/user-follow/:user_id/:target_id', user.addToFollowing);
 app.put('/user-unfollow/:user_id/:target_id', user.removeFromFollowing);
@@ -113,6 +114,7 @@ app.put('/delete-conversation/:user_id/:target_user_id', privateMessage.deleteAl
 app.post('/private-message/:user_id/:target_user_id', privateMessage.sendPrivateMessage);
 app.delete('/private-message/:user_id/:message_id', privateMessage.deleteMessage);
 
+app.post('/complaint-message/:user_id', complaintMessage.addNewComplaintMessage);
 app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
 app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);
 app.put('/complaint-message/:message_id' ,complaintMessage.setRead);

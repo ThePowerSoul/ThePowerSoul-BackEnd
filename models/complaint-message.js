@@ -7,6 +7,7 @@ var ComplaintMessageSchema = new mongoose.Schema({
     TargetLink: String, // 举报内容的网页链接
     Category: String, // 举报原因类型
     CreatedAt: Date, // 举报信息生成时间
-    Status: String // 举报消息阅读状态
+    Status: String, // 举报消息阅读状态
+    Type: String, // Topic or Comment or Article
 });
 module.exports = mongoose.model('ComplaintMessage', ComplaintMessageSchema);

@@ -109,7 +109,8 @@ router.getTopics = function(req, res) {
         } else { // 直接根据页数筛选
             var getTopicsPromise = Topic.find();
             getTopicsPromise.then(function(data) {
-                res.json(data);
+                res.send(200, data);
+                res.end();
             }, function(error) {
                 res.send(err);
             });

@@ -3,7 +3,27 @@ var Topic = require('../models/topic');
 var Article = require('../models/article');
 var express = require('express');
 var crypto = require('crypto');
+var nodemailer = require('nodemailer');
 var router = express.Router();
+
+var config = {
+    host: 'smtp.126.com',
+    secureConnection: true,
+    port: 25,
+    auth: {
+        user: 'wps_zy@126.com',
+        pass: '57592107zhuyue'
+    }
+}
+
+var mail = {
+    from: 'ThePoserSoul <wps_zy@126.com>',
+    subject: 'ThePowerSoul测试邮件',
+    to: '',
+    text: ''
+}
+
+var transporter = nodemailer.createTransport(config);
 
 // 获取用户发的帖子数量和文章数量
 router.getUserTopicAndArticleNumber = function(req, res) {
@@ -322,6 +342,20 @@ router.removeFromFollowing = function(req, res) {
     });
 }
 
+/**
+ *  发送注册账号的邮件
+ */ 
+router.sendVerifyEmail = function(req, res) {
+    mail.to = req.body.Email;
+    mail.text = "看不到文字的都是麻瓜";
+    console.log(mail);
+    transporter.sendMail(mail, function(error, info){
+        if(error) {
+            return console.log(error);
+        }
+        console.log('mail sent:', info.response);
+    });
+}
 
 /*
     注册

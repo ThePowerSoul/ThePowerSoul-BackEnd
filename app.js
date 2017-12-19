@@ -75,6 +75,7 @@ app.put('/user-topic-fav/:user_id/:topic_id', user.addTopicToFav);
 app.put('/user-article-fav/:user_id/:topic_id', user.addArticleToFav);
 app.post('/login', user.login);
 app.post('/signup', user.signUp);
+app.post('/verify-email', user.sendVerifyEmail);
 
 // topic
 app.post('/topic', topic.getTopics);

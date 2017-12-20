@@ -3,9 +3,6 @@ var UserSchema = new mongoose.Schema({
     Name: String, // 姓名
     DisplayName: String, // 显示名
     Email: String, // 邮箱,
-    EmailVerifyExpiredDate: Date, // 邮箱验证码过期日期
-    IsLive: Boolean, // 账号是否被激活
-    EmailVerifyCode: String, // 邮箱验证激活码
     HashedPassword: String, // 密码
     Salt: String, // 盐
     AvatarID: String, // 头像id

@@ -4,7 +4,9 @@ var Article = require('../models/article');
 var express = require('express');
 var crypto = require('crypto');
 var nodemailer = require('nodemailer');
+var jsonwebtoken = require('jsonwebtoken');
 var router = express.Router();
+var salt = "thepowersoul";
 // 开启redis
 var redis = require('redis'),
     RDS_PORT = 6379,        //端口号
@@ -45,6 +47,20 @@ var mail = {
 }
 
 var transporter = nodemailer.createTransport(config);
+
+router.permissionService = function(req, res) {
+    var token = req.body.Token;
+    var email = req.body.Email;
+    client.get(email, function(err, response) {
+        if (err) {
+            res.send(500);
+        } else if (response === null) {
+            res.send(400, '用户登陆已经过期');
+        } else {
+            res.send(200, {Permission: 'good'});
+        }
+    });
+}
 
 // 获取用户发的帖子数量和文章数量
 router.getUserTopicAndArticleNumber = function (req, res) {
@@ -507,14 +523,22 @@ router.login = function (req, res) {
                     //     }
                     // );
                     // res.send(200);
-                    res.send(200, {
-                        Name: data[0].Name,
-                        DisplayName: data[0].DisplayName,
-                        Email: data[0].Email,
-                        Point: data[0].Point,
-                        _id: data[0]._id
-                    });
-
+                    jsonwebtoken.sign(req.body, salt, function(err, token) {
+                        if (err) {
+                            res.send(400, '登陆出错，请重试');
+                        } else {
+                            client.set(email, token);
+                            client.expire(email, 60);
+                            res.send(200, {
+                                Name: data[0].Name,
+                                DisplayName: data[0].DisplayName,
+                                Email: data[0].Email,
+                                Point: data[0].Point,
+                                _id: data[0]._id,
+                                SessionID: token
+                            });
+                        }
+                    })
                 } else {
                     res.send(400, '密码错误，请重新输入');
                 }

@@ -60,6 +60,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // user
 app.use('/', index);
+app.post('/permission-service', user.permissionService);
 app.post('/users', user.getUsers);
 app.get('/user/:user_id', user.getUserDetail);
 app.get('/user-followed-topics/:user_id', user.getFollowingTopicsAndFollowingUsersFollowingTopics);

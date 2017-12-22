@@ -49,13 +49,12 @@ var mail = {
 var transporter = nodemailer.createTransport(config);
 
 router.permissionService = function(req, res) {
-    var token = req.body.Token;
-    var email = req.body.Email;
-    client.get(email, function(err, response) {
+    var token = req.get('Authorization');
+    client.get(token, function(err, response) {
         if (err) {
             res.send(500);
         } else if (response === null) {
-            res.send(400, '用户登陆已经过期');
+            res.send(400, '用户登陆已经过期, 请重新登录');
         } else {
             res.send(200, {Permission: 'good'});
         }
@@ -514,21 +513,16 @@ router.login = function (req, res) {
             crypto.pbkdf2(password, data[0].Salt, 4096, 256, 'sha512', function (error, hash) {
                 if (error) { throw error; }
                 if (hash.toString('hex') === data[0].HashedPassword) {
-                    // req.session[data[0]._id] = data[0];
-                    // res.cookie('tps', data[0]._id, 
-                    //     {
-                    //         expires: new Date(Date.now() + 600000), 
-                    //         httpOnly: false,
-                    //         domain: false
-                    //     }
-                    // );
-                    // res.send(200);
-                    jsonwebtoken.sign(req.body, salt, function(err, token) {
+                    var payload = {
+                        email: email,
+                        iss: 'thepowersoul'
+                    }
+                    jsonwebtoken.sign(payload, salt, function(err, token) {
                         if (err) {
                             res.send(400, '登陆出错，请重试');
                         } else {
-                            client.set(email, token);
-                            client.expire(email, 60);
+                            client.set(token, token);
+                            client.expire(token, 6000);
                             res.send(200, {
                                 Name: data[0].Name,
                                 DisplayName: data[0].DisplayName,

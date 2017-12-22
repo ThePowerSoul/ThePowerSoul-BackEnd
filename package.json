@@ -21,6 +21,7 @@
     "crypto": "^1.0.1",
     "ejs": "^2.5.7",
     "express-session": "^1.15.6",
+    "jsonwebtoken": "^8.1.0",
     "mongoose": "^4.13.2",
     "node-uuid": "^1.4.8",
     "nodemailer": "^4.4.1",

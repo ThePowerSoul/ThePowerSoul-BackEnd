@@ -102,21 +102,35 @@ router.getTopics = function(req, res) {
     var pageNum = input.Page;
     var category = input.Category;
     var keyword = input.Keyword;
-    var LoadAll = input.LoadAll;
-    if (LoadAll) { // 没有类别筛选, 直接根据关键字筛选
+    var LoadAll = input.LoadAll; 
+    if (LoadAll) {
         if (keyword !== '') { // 根据关键字筛选后，再根据页数筛选
             
         } else { // 直接根据页数筛选
             var getTopicsPromise = Topic.find();
             getTopicsPromise.then(function(data) {
-                res.send(200, data);
-                res.end();
+                data.sort(function(a, b) {
+                    return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
+                });
+                var skipNum = (pageNum - 1) * 5;
+                var topics = data.slice(skipNum, skipNum + 5);
+                res.send(200, topics);
             }, function(error) {
-                res.send(err);
+                res.send(error);
             });
         }
     } else { // 首个筛选筛选条件： 类别
-        
+        var getTopicsPromise = Topic.find({Category: category});
+        getTopicsPromise.then(function(data) {
+            data.sort(function(a, b) {
+                return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
+            });
+            var skipNum = (pageNum - 1) * 5;
+            var topics = data.slice(skipNum, skipNum + 5);
+            res.send(200, topics);
+        }, function(error) {
+            res.send(error);
+        });
     }
 }
 

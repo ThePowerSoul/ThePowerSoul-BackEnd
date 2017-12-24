@@ -26,6 +26,21 @@ router.likeTheArticle = function(req, res) {
     });
 }
 
+router.getArticles = function(req, res) {
+    var pageNum = req.body.PageNum;
+    var getArticlePromise = Article.find();
+    getArticlePromise.then(function(data) {
+        data.sort(function(a, b) {
+            return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
+        });
+        var skipNum = (pageNum - 1) * 5;
+        var articles = data.slice(skipNum, skipNum + 5);
+        res.send(200, articles);
+    }, function(error) {
+        res.send(error);
+    });
+}
+
 router.getUserArticles = function(req, res){
     var getUserArticlesPromise =  Article.find({UserID: req.params.user_id});
     getUserArticlesPromise.then(function(data) {
@@ -56,9 +71,10 @@ router.addNewArticle = function(req, res){
     article.Author = input.Author;
     article.LikeUser = [];
     article.DislikeUser = [];
-    article.Category = "";
+    article.Category = input.Category;;
     article.CreatedAt = new Date();
     article.UserID = req.params.user_id;
+    article.IsArticle = true;
     var addNewArticlePromise = article.save();
     addNewArticlePromise.then(function(data) {
         res.json(data);

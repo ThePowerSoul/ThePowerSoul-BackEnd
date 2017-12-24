@@ -40,7 +40,7 @@ app.use(cors());
 // });
 app.use(session({
    secret: 'thepowersoul-session', // 建议使用随机值
-   cookie: ('name', 'value', {path: '/', httpOnly: true,secure: false, maxAge: 60000 }), // cookie保存时间
+   cookie: ('name', 'value', {path: '/', httpOnly: true,secure: false, maxAge: 60000}), // cookie保存时间
    resave: true,
    saveUninitialized: true
 }));
@@ -61,6 +61,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // user
 app.use('/', index);
 app.post('/permission-service', user.permissionService);
+app.post('/remove-session', user.removeSession);
 app.post('/users', user.getUsers);
 app.get('/user/:user_id', user.getUserDetail);
 app.get('/user-followed-topics/:user_id', user.getFollowingTopicsAndFollowingUsersFollowingTopics);
@@ -73,7 +74,7 @@ app.get('/get-publish-number/:user_id', user.getUserTopicAndArticleNumber);
 app.put('/user-follow/:user_id/:target_id', user.addToFollowing);
 app.put('/user-unfollow/:user_id/:target_id', user.removeFromFollowing);
 app.put('/user-topic-fav/:user_id/:topic_id', user.addTopicToFav);
-app.put('/user-article-fav/:user_id/:topic_id', user.addArticleToFav);
+app.put('/user-article-fav/:user_id/:article_id', user.addArticleToFav);
 app.post('/login', user.login);
 app.post('/signup', user.signUp);
 app.post('/verify-email', user.sendVerifyEmail);
@@ -87,7 +88,7 @@ app.put('/topic/:user_id/:topic_id/:operation_type', topic.likeOrDislike);
 app.delete('/topic/:topic_id', topic.deleteTopic);
 
 //comment
-app.get('/comment/:topic_id', comment.getTopicComments);
+app.post('/comment/:topic_id', comment.getTopicComments);
 app.post('/comment/:user_id/:topic_id', comment.addNewComment);
 app.get('/comment/:user_id/:target_user_id/:context_id', comment.getConversation);
 app.put('/comment/:user_id/:comment_id/:operation_type', comment.likeOrDislike);
@@ -95,6 +96,7 @@ app.delete('/comment/:comment_id', comment.deleteComment);
 
 // article
 app.get('/article/:article_id', article.getArticle);
+app.post('/articles', article.getArticles);
 app.get('/articles/:user_id', article.getUserArticles);
 app.post('/article/:user_id', article.addNewArticle);
 app.put('/article/:user_id/:article_id', article.likeTheArticle);
@@ -108,7 +110,7 @@ app.put('/article-draft/:article_draft_id',articleDraft.updateArticleDraft);
 app.delete('/article-draft/:article_draft_id', articleDraft.deleteArticleDraft);
 
 // private message
-app.get('/private-message/:user_id/:target_user_id', privateMessage.getUserMessageConversation);
+app.post('/private-messages/:user_id/:target_user_id', privateMessage.getUserMessageConversation);
 app.get('/private-message/:user_id', privateMessage.getUserPrivateMessage);
 app.put('/private-message/:user_id/:target_user_id', privateMessage.markReadBetweenTwoUsers);
 app.put('/private-message/:user_id', privateMessage.markAllRead);
@@ -116,6 +118,7 @@ app.put('/delete-conversation/:user_id/:target_user_id', privateMessage.deleteAl
 app.post('/private-message/:user_id/:target_user_id', privateMessage.sendPrivateMessage);
 app.delete('/private-message/:user_id/:message_id', privateMessage.deleteMessage);
 
+// complaint-message
 app.post('/complaint-message/:user_id', complaintMessage.addNewComplaintMessage);
 app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
 app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);

@@ -61,6 +61,29 @@ router.permissionService = function(req, res) {
     });
 }
 
+router.removeSession = function(req, res) {
+    var token = req.get('Authorization');
+    console.log(token);
+    client.get(token, function(err, response) {
+        if (err) {
+            res.send(500, '清除用户信息失败');
+        } else if(response === null) {
+            res.send(200);
+            console.log("response null");
+        } else {
+            // 删除session
+            client.del(token, function(err, response) {
+                console.log('delete');
+                if (err) {
+                    res.send(500, '清除用户信息失败');
+                } else {
+                    res.send(200);
+                }
+            });
+        }
+    });
+}
+
 // 获取用户发的帖子数量和文章数量
 router.getUserTopicAndArticleNumber = function (req, res) {
     var user_id = req.params.user_id;
@@ -283,12 +306,15 @@ router.addArticleToFav = function (req, res) {
     var user_id = req.params.user_id;
     var article_id = req.params.article_id;
     var findUserPromise = User.find({ _id: user_id });
+    console.log(article_id);
     findUserPromise.then(function (data) {
         if (data.length > 0) {
             var user = data[0];
             if (user.FavArticles.indexOf(article_id) >= 0) {
+                console.log(article_id, '1');
                 res.send(400, "Added");
             } else {
+                console.log(article_id, '2');
                 var addToUserArticleFavPromise = User.update({ _id: user_id }, { $push: { "FavArticles": article_id } });
                 addToUserArticleFavPromise.then(function (data) {
                     res.send(200, data);

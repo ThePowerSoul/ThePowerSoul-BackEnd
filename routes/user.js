@@ -5,6 +5,8 @@ var express = require('express');
 var crypto = require('crypto');
 var nodemailer = require('nodemailer');
 var jsonwebtoken = require('jsonwebtoken');
+var oss = require('ali-oss');
+var co = require('co');
 var router = express.Router();
 var salt = "thepowersoul";
 // 开启redis
@@ -54,9 +56,10 @@ var Crypto = require('../lib/crypto.js');
 var host = 'thepowersoul2018.oss-cn-qingdao.aliyuncs.com';
 var accessid = 'LTAILjmmB1fnhHlx';
 var accesskey = '2WWvSKQVLOLCto3UsdNVGdqfPOS2AG';
+var message;
 
 var policyText = {
-    "expiration": "2025-01-01T12:00:00.000Z", //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
+    "expiration": "2020-01-01T12:00:00.000Z", //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
     "conditions": [
         ["content-length-range", 0, 1048576000] // 设置上传文件的大小限制
     ]
@@ -67,12 +70,35 @@ message = policyBase64;
 var bytes = Crypto.HMAC(Crypto.SHA1, message, accesskey, { asBytes: true });
 var signature = Crypto.bytesToBase64(bytes);
 
+// 定义下载oss文件client
+var ossClient = new oss.Wrapper({
+    accessKeyId: accessid,
+    accessKeySecret: accesskey,
+    bucket: 'thepowersoul2018',
+    region: 'oss-cn-qingdao'
+});
+
 router.uploadProfilePicture = function (req, res) {
     var obj = {
         Signature: signature,
         PolicyText: policyBase64
     }
     res.send(200, obj);
+}
+
+router.setPicturePublic = function (req, res) {
+    var key = req.body.Key;
+    co(function* () {
+        yield ossClient.putACL(key, 'public-read');
+        var obj = yield ossClient.get(key);
+        console.log(obj);
+        res.send(200, {Src: obj.res.requestUrls[0]});
+        var result = yield ossClient.getACL(key);
+        console.log(result.acl); // public-read
+    }).catch(function (err) {
+        console.log(err);
+        res.send(err);
+    });
 }
 
 router.permissionService = function (req, res) {

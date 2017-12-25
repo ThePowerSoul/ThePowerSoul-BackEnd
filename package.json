@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "ali-oss": "^4.11.3",
+    "co": "^4.6.0",
     "connect-mongo": "^2.0.0",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",

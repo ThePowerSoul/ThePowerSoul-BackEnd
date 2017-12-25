@@ -48,31 +48,58 @@ var mail = {
 
 var transporter = nodemailer.createTransport(config);
 
-router.permissionService = function(req, res) {
+// 获得上传签名
+var Base64 = require('../lib/base64.js');
+var Crypto = require('../lib/crypto.js');
+var host = 'thepowersoul2018.oss-cn-qingdao.aliyuncs.com';
+var accessid = 'LTAILjmmB1fnhHlx';
+var accesskey = '2WWvSKQVLOLCto3UsdNVGdqfPOS2AG';
+
+var policyText = {
+    "expiration": "2025-01-01T12:00:00.000Z", //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
+    "conditions": [
+        ["content-length-range", 0, 1048576000] // 设置上传文件的大小限制
+    ]
+};
+
+var policyBase64 = Base64.encode(JSON.stringify(policyText));
+message = policyBase64;
+var bytes = Crypto.HMAC(Crypto.SHA1, message, accesskey, { asBytes: true });
+var signature = Crypto.bytesToBase64(bytes);
+
+router.uploadProfilePicture = function (req, res) {
+    var obj = {
+        Signature: signature,
+        PolicyText: policyBase64
+    }
+    res.send(200, obj);
+}
+
+router.permissionService = function (req, res) {
     var token = req.get('Authorization');
-    client.get(token, function(err, response) {
+    client.get(token, function (err, response) {
         if (err) {
             res.send(500);
         } else if (response === null) {
             res.send(400, '用户登陆已经过期, 请重新登录');
         } else {
-            res.send(200, {Permission: 'good'});
+            res.send(200, { Permission: 'good' });
         }
     });
 }
 
-router.removeSession = function(req, res) {
+router.removeSession = function (req, res) {
     var token = req.get('Authorization');
     console.log(token);
-    client.get(token, function(err, response) {
+    client.get(token, function (err, response) {
         if (err) {
             res.send(500, '清除用户信息失败');
-        } else if(response === null) {
+        } else if (response === null) {
             res.send(200);
             console.log("response null");
         } else {
             // 删除session
-            client.del(token, function(err, response) {
+            client.del(token, function (err, response) {
                 console.log('delete');
                 if (err) {
                     res.send(500, '清除用户信息失败');
@@ -543,7 +570,7 @@ router.login = function (req, res) {
                         email: email,
                         iss: 'thepowersoul'
                     }
-                    jsonwebtoken.sign(payload, salt, function(err, token) {
+                    jsonwebtoken.sign(payload, salt, function (err, token) {
                         if (err) {
                             res.send(400, '登陆出错，请重试');
                         } else {

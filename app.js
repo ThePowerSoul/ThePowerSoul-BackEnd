@@ -60,6 +60,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // user
 app.use('/', index);
+app.get('/get-upload-policy', user.uploadProfilePicture);
 app.post('/permission-service', user.permissionService);
 app.post('/remove-session', user.removeSession);
 app.post('/users', user.getUsers);

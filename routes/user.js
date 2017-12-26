@@ -78,7 +78,7 @@ var ossClient = new oss.Wrapper({
     region: 'oss-cn-qingdao'
 });
 
-router.uploadProfilePicture = function (req, res) {
+router.getUploadPolicy = function (req, res) {
     var obj = {
         Signature: signature,
         PolicyText: policyBase64
@@ -91,14 +91,23 @@ router.setPicturePublic = function (req, res) {
     co(function* () {
         yield ossClient.putACL(key, 'public-read');
         var obj = yield ossClient.get(key);
-        console.log(obj);
         res.send(200, {Src: obj.res.requestUrls[0]});
         var result = yield ossClient.getACL(key);
-        console.log(result.acl); // public-read
     }).catch(function (err) {
         console.log(err);
         res.send(err);
     });
+}
+
+router.updateProfilePicture = function(req, res) {
+    var url = req.body.Src; // 获取用户头像的url
+    var user_id = req.params.user_id;
+    User.update({_id: user_id}, { $set: {'AvatarID': url}})
+        .then(function(data) {
+            res.send(200);
+        }, function(error) {
+            res.send(500, error);
+        });
 }
 
 router.permissionService = function (req, res) {
@@ -116,7 +125,6 @@ router.permissionService = function (req, res) {
 
 router.removeSession = function (req, res) {
     var token = req.get('Authorization');
-    console.log(token);
     client.get(token, function (err, response) {
         if (err) {
             res.send(500, '清除用户信息失败');
@@ -608,7 +616,8 @@ router.login = function (req, res) {
                                 Email: data[0].Email,
                                 Point: data[0].Point,
                                 _id: data[0]._id,
-                                SessionID: token
+                                SessionID: token,
+                                AvatarID: data[0].AvatarID
                             });
                         }
                     })

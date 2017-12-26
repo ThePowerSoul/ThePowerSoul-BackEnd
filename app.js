@@ -60,7 +60,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // user
 app.use('/', index);
-app.get('/get-upload-policy', user.uploadProfilePicture);
+app.get('/get-upload-policy', user.getUploadPolicy);
 app.put('/set-picture-public', user.setPicturePublic);
 app.post('/permission-service', user.permissionService);
 app.post('/remove-session', user.removeSession);
@@ -77,6 +77,7 @@ app.put('/user-follow/:user_id/:target_id', user.addToFollowing);
 app.put('/user-unfollow/:user_id/:target_id', user.removeFromFollowing);
 app.put('/user-topic-fav/:user_id/:topic_id', user.addTopicToFav);
 app.put('/user-article-fav/:user_id/:article_id', user.addArticleToFav);
+app.put('/user-update-picture/:user_id', user.updateProfilePicture);
 app.post('/login', user.login);
 app.post('/signup', user.signUp);
 app.post('/verify-email', user.sendVerifyEmail);
@@ -97,6 +98,7 @@ app.put('/comment/:user_id/:comment_id/:operation_type', comment.likeOrDislike);
 app.delete('/comment/:comment_id', comment.deleteComment);
 
 // article
+app.post('/upload-picture-rich-text', article.getUploadPicture);
 app.get('/article/:article_id', article.getArticle);
 app.post('/articles', article.getArticles);
 app.get('/articles/:user_id', article.getUserArticles);

@@ -16,6 +16,19 @@ var ossClient = new oss.Wrapper({
     region: 'oss-cn-beijing'
 });
 
+router.setVideoPublic = function(req, res) {
+    var key = req.body.Key;
+    co(function* () {
+        yield ossClient.putACL(key, 'public-read');
+        var obj = yield ossClient.get(key);
+        res.send(200, {Src: obj.res.requestUrls[0]});
+        var result = yield ossClient.getACL(key);
+    }).catch(function (err) {
+        console.log(err);
+        res.send(err);
+    });
+}
+
 router.getUploadPicture = function (req, res) {
     var form = new formidable.IncomingForm();
     var imagesRoot = path.join(process.cwd(), 'images');

@@ -53,7 +53,7 @@ var transporter = nodemailer.createTransport(config);
 // 获得上传签名
 var Base64 = require('../lib/base64.js');
 var Crypto = require('../lib/crypto.js');
-var host = 'thepowersoul2018.oss-cn-qingdao.aliyuncs.com';
+var host = 'thepowersoul2018.oss-cn-qingdao-internal.aliyuncs.com';
 var accessid = 'LTAILjmmB1fnhHlx';
 var accesskey = '2WWvSKQVLOLCto3UsdNVGdqfPOS2AG';
 var message;

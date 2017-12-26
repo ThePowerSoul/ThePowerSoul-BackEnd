@@ -104,6 +104,7 @@ app.post('/articles', article.getArticles);
 app.get('/articles/:user_id', article.getUserArticles);
 app.post('/article/:user_id', article.addNewArticle);
 app.put('/article/:user_id/:article_id', article.likeTheArticle);
+app.put('/set-video-public', article.setVideoPublic);
 app.delete('/article/:article_id', article.deleteArticle);
 
 // article draft

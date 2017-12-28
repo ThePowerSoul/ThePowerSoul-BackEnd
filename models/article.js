@@ -7,6 +7,7 @@ var ArticleSchema = new mongoose.Schema({
 	CreatedAt: Date,
 	Author: String,
 	IsArticle: Boolean,
+	View: Number,
 	LikeUser: [],
 	DislikeUser: []
 });

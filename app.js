@@ -84,10 +84,12 @@ app.post('/verify-email', user.sendVerifyEmail);
 
 // topic
 app.post('/topic', topic.getTopics);
+app.get('/topic', topic.getHotTopics);
 app.get('/topic/:user_id', topic.getUserTopics);
 app.get('/topic/:user_id/:topic_id', topic.getTopicDetail);
 app.post('/topic/:user_id', topic.addNewTopic);
 app.put('/topic/:user_id/:topic_id/:operation_type', topic.likeOrDislike);
+app.put('/topic/:topic_id', topic.addTopicView);
 app.delete('/topic/:topic_id', topic.deleteTopic);
 
 //comment
@@ -100,10 +102,12 @@ app.delete('/comment/:comment_id', comment.deleteComment);
 // article
 app.post('/upload-picture-rich-text', article.getUploadPicture);
 app.get('/article/:article_id', article.getArticle);
+app.get('/article', article.getHotArticles);
 app.post('/articles', article.getArticles);
 app.get('/articles/:user_id', article.getUserArticles);
 app.post('/article/:user_id', article.addNewArticle);
 app.put('/article/:user_id/:article_id', article.likeTheArticle);
+app.put('/article/:article_id', article.addArticleView);
 app.put('/set-video-public', article.setVideoPublic);
 app.delete('/article/:article_id', article.deleteArticle);
 

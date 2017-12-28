@@ -6,6 +6,7 @@ var TopicSchema = new mongoose.Schema({
 	Category: String,
 	CreatedAt: Date,
 	Author: String,
+	View: Number,
 	LikeUser: [],
 	DislikeUser: []
 });

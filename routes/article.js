@@ -94,6 +94,32 @@ router.likeTheArticle = function (req, res) {
     });
 }
 
+router.getHotArticles = function(req, res) {
+    var article_id = req.params.article_id;
+    var findArticlesPromise = Article.find({ _id: article_id });
+    findArticlesPromise.then(function (data) {
+        var result = calHotArticles(data);
+        res.send(200, result);
+    }, function (error) {
+        res.send(error);
+    });
+}
+
+function calHotArticles(arr) {
+    arr.sort(function (a, b) {
+        var valA = a.View + a.LikeUser.length * 2;
+        var valB = b.View + b.LikeUser.length * 2;
+        if (valA < valB) {
+            return 1;
+        } else if (valA == valB) {
+            return 0;
+        } else {
+            return -1;
+        }
+    });
+    return arr.slice(0, 6);
+}
+
 router.getArticles = function (req, res) {
     var pageNum = req.body.PageNum;
     var getArticlePromise = Article.find();
@@ -131,6 +157,15 @@ router.getArticle = function (req, res) {
     });
 }
 
+router.addArticleView = function(req, res) {
+    var addArticleViewPromise = Article.update({_id: article_id}, {$inc: {'View': 1}});
+    addArticleViewPromise.then(function(data) {
+        res.send(200);
+    }, function(error) {
+        res.send(error);
+    });
+}
+
 router.addNewArticle = function (req, res) {
     var input = req.body;
     var article = new Article();
@@ -143,6 +178,7 @@ router.addNewArticle = function (req, res) {
     article.CreatedAt = new Date();
     article.UserID = req.params.user_id;
     article.IsArticle = true;
+    article.View = 0;
     var addNewArticlePromise = article.save();
     addNewArticlePromise.then(function (data) {
         res.json(data);

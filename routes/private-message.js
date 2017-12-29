@@ -10,12 +10,25 @@ router.getUserMessageConversation = function (req, res) {
     var pageNum = req.body.PageNum;
     var getUserMessageConversationPromise = PrivateMessage.find({
         '$or':
-            [{ UserID: user_id, TargetUserID: target_user_id },
-            { UserID: target_user_id, TargetUserID: user_id }]
+        [{ UserID: user_id, TargetUserID: target_user_id },
+        { UserID: target_user_id, TargetUserID: user_id }]
     });
     getUserMessageConversationPromise.then(function (data) {
+        var newArr = [];
+        data.forEach(function (message) { // 对已删除的消息进行过滤
+            if (
+                (user_id === message._doc.UserID && message._doc.UserDelStatus === false)
+                || (message._doc.TargetUserID === user_id && message._doc.TargetUserDelStatus === false)
+            ) {
+                newArr.push(message);
+            }
+        });
+        newArr.sort(function (a, b) {
+            return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
+        });
+        console.log(newArr);
         var skipNum = (pageNum - 1) * 5;
-        var messages = data.slice(skipNum, skipNum + 5);
+        var messages = newArr.slice(skipNum, skipNum + 5);
         res.send(200, messages);
     }, function (error) {
         res.send(error);
@@ -86,8 +99,8 @@ router.deleteAllMessageInConversation = function (req, res) {
     /******************* 更新对应所有私信的当前用户这一边的状态 ****************/
     PrivateMessage.find({
         '$or':
-            [{ UserID: user_id, TargetUserID: target_user_id },
-            { UserID: target_user_id, TargetUserID: user_id }]
+        [{ UserID: user_id, TargetUserID: target_user_id },
+        { UserID: target_user_id, TargetUserID: user_id }]
     })
         .then(function (data) {
             for (var i = 0; i < data.length; i++) {
@@ -159,7 +172,7 @@ router.deleteMessage = function (req, res) {
         // console.log(message_id);
         PrivateMessage.update({ _id: message_id }, {
             '$set':
-                { 'UserDelStatus': targetMessage.UserDelStatus, 'TargetUserDelStatus': targetMessage.TargetUserDelStatus }
+            { 'UserDelStatus': targetMessage.UserDelStatus, 'TargetUserDelStatus': targetMessage.TargetUserDelStatus }
         }).then(function (data) {
             // console.log(data, 444);
             var index = null;
@@ -180,8 +193,8 @@ router.deleteMessage = function (req, res) {
                             console.log(user_id, target_user_id, userRecentConverstaion);
                             PrivateMessage.find({
                                 '$or':
-                                    [{ UserID: user_id, TargetUserID: target_user_id },
-                                    { UserID: target_user_id, TargetUserID: user_id }]
+                                [{ UserID: user_id, TargetUserID: target_user_id },
+                                { UserID: target_user_id, TargetUserID: user_id }]
                             })
                                 .then(function (data) {
                                     console.log(data, 666);

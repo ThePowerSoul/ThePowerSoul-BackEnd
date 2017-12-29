@@ -29,9 +29,6 @@ function dislikeTheTopic(topic_id, user_id, res) {
     });
 }
 
-/*
- * 
- */
 function removeFromLikeList(topic_id, user_id, res) {
     var removeLikeTopicPromise = Topic.update({ _id: topic_id }, { $pull: { "LikeUser": user_id } });
     return removeLikeTopicPromise.then(function (data) {
@@ -41,9 +38,6 @@ function removeFromLikeList(topic_id, user_id, res) {
     });
 }
 
-/*
- * 
- */
 function removeFromDislikeList(topic_id, user_id, res) {
     var removeDislikeTopicPromise = Topic.update({ _id: topic_id }, { $pull: { "DislikeUser": user_id } });
     return removeDislikeTopicPromise.then(function (data) {
@@ -52,7 +46,6 @@ function removeFromDislikeList(topic_id, user_id, res) {
         res.send(error);
     });
 }
-
 
 /*
  * 点赞或者取消赞
@@ -144,30 +137,50 @@ router.getTopics = function (req, res) {
     var keyword = input.Keyword;
     var LoadAll = input.LoadAll;
     if (LoadAll) {
-        if (keyword !== '') { // 根据关键字筛选后，再根据页数筛选
-
-        } else { // 直接根据页数筛选
-            var getTopicsPromise = Topic.find();
-            getTopicsPromise.then(function (data) {
+        var getTopicsPromise = Topic.find();
+        getTopicsPromise.then(function (data) {
+            if (keyword !== '') { // 根据关键字筛选后，再根据页数筛选
+                var newArr = [];
+                data.forEach(function (topic) {
+                    if (topic._doc.Title.indexOf(keyword) > 0) {
+                        newArr.push(topic);
+                    }
+                });
+                var skipNum = (pageNum - 1) * 5;
+                var topics = newArr.slice(skipNum, skipNum + 5);
+                res.send(200, topics);
+            } else { // 直接根据页数筛选
                 data.sort(function (a, b) {
                     return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
                 });
                 var skipNum = (pageNum - 1) * 5;
                 var topics = data.slice(skipNum, skipNum + 5);
                 res.send(200, topics);
-            }, function (error) {
-                res.send(error);
-            });
-        }
+            }
+        }, function (error) {
+            res.send(error);
+        });
     } else { // 首个筛选筛选条件： 类别
         var getTopicsPromise = Topic.find({ Category: category });
         getTopicsPromise.then(function (data) {
-            data.sort(function (a, b) {
-                return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
-            });
-            var skipNum = (pageNum - 1) * 5;
-            var topics = data.slice(skipNum, skipNum + 5);
-            res.send(200, topics);
+            if (keyword !== '') {
+                var newArr = [];
+                data.forEach(function (topic) {
+                    if (topic._doc.Title.indexOf(keyword) > 0) {
+                        newArr.push(topic);
+                    }
+                });
+                var skipNum = (pageNum - 1) * 5;
+                var topics = newArr.slice(skipNum, skipNum + 5);
+                res.send(200, topics);
+            } else {
+                data.sort(function (a, b) {
+                    return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
+                });
+                var skipNum = (pageNum - 1) * 5;
+                var topics = data.slice(skipNum, skipNum + 5);
+                res.send(200, topics);
+            }
         }, function (error) {
             res.send(error);
         });

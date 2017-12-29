@@ -6,7 +6,6 @@ var formidable = require('formidable');
 var oss = require('ali-oss');
 var co = require('co');
 var router = express.Router();
-
 var accessid = 'LTAILjmmB1fnhHlx';
 var accesskey = '2WWvSKQVLOLCto3UsdNVGdqfPOS2AG';
 var ossClient = new oss.Wrapper({
@@ -42,10 +41,10 @@ router.getUploadPicture = function (req, res) {
             // 
             res.send(500, {success: false, msg: '图片上传失败，请重试'});
         }
-
         var fileExtension = filePath.substring(filePath.lastIndexOf('.'));
         if (('.jpg.jpeg.png.gif').indexOf(fileExtension.toLowerCase()) < 0) {
             // 文件类型不合法
+            res.send(500, '文件类型不合法');
         } else {
             // 上传文件到阿里云
             co(function* () {
@@ -121,8 +120,17 @@ function calHotArticles(arr) {
 }
 
 router.getArticles = function (req, res) {
+    var input = req.body;
+    var category = input.Category;
+    var keyword = input.Keyword;
+    var loadAll = input.LoadAll;
     var pageNum = req.body.PageNum;
     var getArticlePromise = Article.find();
+    if (loadAll) {
+        
+    } else {
+
+    }
     getArticlePromise.then(function (data) {
         data.sort(function (a, b) {
             return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);

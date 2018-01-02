@@ -129,9 +129,9 @@ app.delete('/private-message/:user_id/:message_id', privateMessage.deleteMessage
 
 // complaint-message
 app.post('/complaint-message/:user_id', complaintMessage.addNewComplaintMessage);
-app.get('/complaint-unread-message' ,complaintMessage.getUnreadComplaintMessages);
-app.get('/complaint-message' ,complaintMessage.getAllComplaintMessages);
-app.put('/complaint-message/:message_id' ,complaintMessage.setRead);
+app.get('/complaint-unread-message', complaintMessage.getUnreadComplaintMessages);
+app.get('/complaint-message', complaintMessage.getAllComplaintMessages);
+app.put('/complaint-message/:message_id', complaintMessage.setRead);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

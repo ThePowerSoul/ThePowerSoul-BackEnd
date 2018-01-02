@@ -10,8 +10,8 @@ router.getUserMessageConversation = function (req, res) {
     var pageNum = req.body.PageNum;
     var getUserMessageConversationPromise = PrivateMessage.find({
         '$or':
-        [{ UserID: user_id, TargetUserID: target_user_id },
-        { UserID: target_user_id, TargetUserID: user_id }]
+            [{ UserID: user_id, TargetUserID: target_user_id },
+            { UserID: target_user_id, TargetUserID: user_id }]
     });
     getUserMessageConversationPromise.then(function (data) {
         var newArr = [];
@@ -99,8 +99,8 @@ router.deleteAllMessageInConversation = function (req, res) {
     /******************* 更新对应所有私信的当前用户这一边的状态 ****************/
     PrivateMessage.find({
         '$or':
-        [{ UserID: user_id, TargetUserID: target_user_id },
-        { UserID: target_user_id, TargetUserID: user_id }]
+            [{ UserID: user_id, TargetUserID: target_user_id },
+            { UserID: target_user_id, TargetUserID: user_id }]
     })
         .then(function (data) {
             for (var i = 0; i < data.length; i++) {
@@ -172,7 +172,7 @@ router.deleteMessage = function (req, res) {
         // console.log(message_id);
         PrivateMessage.update({ _id: message_id }, {
             '$set':
-            { 'UserDelStatus': targetMessage.UserDelStatus, 'TargetUserDelStatus': targetMessage.TargetUserDelStatus }
+                { 'UserDelStatus': targetMessage.UserDelStatus, 'TargetUserDelStatus': targetMessage.TargetUserDelStatus }
         }).then(function (data) {
             // console.log(data, 444);
             var index = null;
@@ -193,8 +193,8 @@ router.deleteMessage = function (req, res) {
                             console.log(user_id, target_user_id, userRecentConverstaion);
                             PrivateMessage.find({
                                 '$or':
-                                [{ UserID: user_id, TargetUserID: target_user_id },
-                                { UserID: target_user_id, TargetUserID: user_id }]
+                                    [{ UserID: user_id, TargetUserID: target_user_id },
+                                    { UserID: target_user_id, TargetUserID: user_id }]
                             })
                                 .then(function (data) {
                                     console.log(data, 666);

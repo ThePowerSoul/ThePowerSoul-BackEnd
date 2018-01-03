@@ -142,11 +142,13 @@ router.getTopics = function (req, res) {
             if (keyword !== '') { // 根据关键字筛选后，再根据页数筛选
                 var newArr = [];
                 data.forEach(function (topic) {
-                    if (topic._doc.Title.indexOf(keyword) > 0) {
+                    console.log(topic);
+                    if (topic.Title.indexOf(keyword) >= 0) {
                         newArr.push(topic);
                     }
                 });
                 var skipNum = (pageNum - 1) * 5;
+                console.log(newArr);
                 var topics = newArr.slice(skipNum, skipNum + 5);
                 res.send(200, topics);
             } else { // 直接根据页数筛选

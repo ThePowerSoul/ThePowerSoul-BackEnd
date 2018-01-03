@@ -26,7 +26,8 @@
     "node-uuid": "^1.4.8",
     "nodemailer": "^4.4.1",
     "nodemon": "^1.12.1",
-    "simditor": "^2.3.6"
+    "simditor": "^2.3.6",
+    "redis": "^2.8.0"
   },
   "devDependencies": {
     "ali-oss": "^4.11.3",
@@ -43,6 +44,7 @@
     "node-uuid": "^1.4.8",
     "nodemailer": "^4.4.1",
     "nodemon": "^1.12.1",
+    "redis": "^2.8.0",
     "simditor": "^2.3.6"
   }
 }

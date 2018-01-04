@@ -20,6 +20,34 @@ client.on('ready', function (res) {
     console.log('ready');
 });
 
+router.getSiteData = function(req, res) {
+    var body = {
+        RegisteredUserNumber: 0,
+        ActiveUserNumber: 0,
+        TopicCount: 0,
+        ArticleCount: 0
+    }
+    var getUserNumberPromise = User.find();
+    var getTopicNumberPromise = Topic.find();
+    var getArticleNumberPromise = Article.find();
+    getUserNumberPromise.then(function(data) {
+        body.RegisteredUserNumber = data.length;
+        getTopicNumberPromise.then(function(data) {
+            body.TopicCount = data.length;
+            getArticleNumberPromise.then(function(data) {
+                body.ArticleCount = data.length;
+                res.send(200, body);
+            }, function(err) {
+                res.send(err);
+            });
+        }, function(err) {
+            res.send(err);
+        });
+    }, function(err) {
+        res.send(err);
+    });
+}
+
 function createCode() {
     var code = "";
     var codeLength = 4;

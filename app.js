@@ -58,8 +58,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 // user
 app.use('/', index);
+app.get('/site-data', user.getSiteData);
+
 app.get('/get-upload-policy', user.getUploadPolicy);
 app.put('/set-picture-public', user.setPicturePublic);
 app.post('/permission-service', user.permissionService);

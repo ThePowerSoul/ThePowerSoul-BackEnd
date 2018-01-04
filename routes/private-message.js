@@ -26,7 +26,6 @@ router.getUserMessageConversation = function (req, res) {
         newArr.sort(function (a, b) {
             return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
         });
-        console.log(newArr);
         var skipNum = (pageNum - 1) * 5;
         var messages = newArr.slice(skipNum, skipNum + 5);
         res.send(200, messages);
@@ -190,19 +189,16 @@ router.deleteMessage = function (req, res) {
                     data[0].MostRecentConversation.splice(index, 1);
                     User.update({ _id: user_id }, { '$set': { 'MostRecentConversation': data[0].MostRecentConversation } })
                         .then(function (data) {
-                            console.log(user_id, target_user_id, userRecentConverstaion);
                             PrivateMessage.find({
                                 '$or':
                                     [{ UserID: user_id, TargetUserID: target_user_id },
                                     { UserID: target_user_id, TargetUserID: user_id }]
                             })
                                 .then(function (data) {
-                                    console.log(data, 666);
                                     if (data.length > 0) {
                                         var flag = false;
                                         for (var i = 0; i < data.length; i++) {
                                             var message = data[i];
-                                            console.log(message.UserID === user_id, message.UserDelStatus === false);
                                             if (message.UserID === user_id && message.UserDelStatus === false) {
                                                 flag = true;
                                                 var newObj = {
@@ -215,9 +211,7 @@ router.deleteMessage = function (req, res) {
                                                     Status: '0',
                                                     CreatedAt: new Date()
                                                 }
-                                                console.log(newObj, 777);
                                                 userRecentConverstaion.splice(index, 0, newObj);
-                                                console.log(userRecentConverstaion);
                                                 User.update({ _id: user_id }, { '$set': { 'MostRecentConversation': userRecentConverstaion } })
                                                     .then(function (data) {
                                                         res.send(200, data);
@@ -238,7 +232,6 @@ router.deleteMessage = function (req, res) {
                                                     CreatedAt: new Date()
                                                 }
                                                 userRecentConverstaion.splice(index, 0, newObj);
-                                                console.log(userRecentConverstaion, 888);
                                                 User.update({ _id: user_id }, { '$set': { 'MostRecentConversation': userRecentConverstaion } })
                                                     .then(function (data) {
                                                         res.send(200, data);
@@ -249,7 +242,6 @@ router.deleteMessage = function (req, res) {
                                             }
                                         }
                                         if (!flag) {
-                                            console.log('flag', flag, 'nothing');
                                             res.send(200);
                                         }
                                     } else {
@@ -321,7 +313,7 @@ router.sendPrivateMessage = function (req, res) {
             data[0].MostRecentConversation.unshift(newObj);
             User.update({ _id: user_id }, { '$set': { 'MostRecentConversation': data[0].MostRecentConversation } })
                 .then(function (data) {
-                    res.send(200, data);
+                    res.send(200, "add ok");
                 }, function (error) {
                     res.send(error);
                 });
@@ -351,7 +343,7 @@ router.sendPrivateMessage = function (req, res) {
                 data[0].MostRecentConversation.unshift(newObj);
                 User.update({ _id: target_user_id }, { '$set': { 'MostRecentConversation': data[0].MostRecentConversation } })
                     .then(function (data) {
-                        res.send(200, data);
+                        res.send(200, "add ok");
                     }, function (error) {
                         res.send(error);
                     });

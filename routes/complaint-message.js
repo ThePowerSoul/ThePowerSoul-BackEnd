@@ -12,6 +12,7 @@ router.addNewComplaintMessage = function(req, res) {
     complaintMesssage.TargetID = input.TargetID;
     complaintMesssage.TargetLink = input.TargetLink;
     complaintMesssage.Category = input.Category;
+    complaintMesssage.TargetUserID = input.TargetUserID;
     complaintMesssage.CreatedAt = new Date();
     complaintMesssage.Status = "0";
     complaintMesssage.save()

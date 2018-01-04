@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var ComplaintMessageSchema = new mongoose.Schema({
     UserID: String, //　举报的用户id
+    TargetUserID: String, //被举报的用户id
     Author: String, // 举报者姓名
     Content: String, // 举报具体原因
     TargetID: String, // 举报帖子或者文章的id

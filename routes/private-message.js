@@ -46,31 +46,41 @@ router.markAllRead = function (req, res) {
 }
 
 // 将两个用户之间的未读标记为已读
+// '$or': [
+//     { UserID: user_id, TargetUserID: target_user_id },
+//     { UserID: target_user_id, TargetUserID: user_id }
+// ]
 router.markReadBetweenTwoUsers = function (req, res) {
     var user_id = req.params.user_id;
     var target_user_id = req.params.target_user_id;
-    var markReadBetweenTwoUsersPromise = PrivateMessage.update({
-        '$or': [
-            { UserID: user_id, TargetUserID: target_user_id },
-            { UserID: target_user_id, TargetUserID: user_id }
-        ]
-    }, { '$set': { 'Status': '1' } }, { multi: true });
+    var markReadBetweenTwoUsersPromise = PrivateMessage.update(
+        {
+            UserID: target_user_id, 
+            TargetUserID: user_id
+        },
+        {
+            '$set': { 'Status': '1' }
+        },
+        { multi: true }
+    );
     markReadBetweenTwoUsersPromise.then(function (data) {
-        User.find({ _id: user_id }).then(function (data) {
+        User.find({ _id: user_id }).then(function (userData) {
             var index = null;
-            data[0].MostRecentConversation.forEach(function (message, i) {
+            userData[0].MostRecentConversation.forEach(function (message, i) {
                 if (message.TargetID === user_id && message.SenderID === target_user_id) {
                     index = i;
                 }
             });
             if (index !== null) {
-                data[0].MostRecentConversation[index].Status = '1';
-                User.update({ _id: user_id }, { '$set': { 'MostRecentConversation': data[0].MostRecentConversation } })
-                    .then(function (data) {
-                        res.send(200, data);
+                userData[0].MostRecentConversation[index].Status = '1';
+                User.update({ _id: user_id }, { '$set': { 'MostRecentConversation': userData[0].MostRecentConversation } })
+                    .then(function (response) {
+                        res.send(200, response);
                     }, function (error) {
                         res.send(error);
                     })
+            } else {
+                res.send(400);
             }
         }, function (error) {
             res.send(error);

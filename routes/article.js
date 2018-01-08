@@ -23,7 +23,6 @@ router.setVideoPublic = function(req, res) {
         res.send(200, {Src: obj.res.requestUrls[0]});
         var result = yield ossClient.getACL(key);
     }).catch(function (err) {
-        console.log(err);
         res.send(err);
     });
 }

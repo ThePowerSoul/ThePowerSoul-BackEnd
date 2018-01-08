@@ -5,7 +5,6 @@ var router = express.Router();
 router.getUserArticleDrafts = function(req, res){
     var getUserArticleDraftsPromise =  ArticleDraft.find({UserID: req.params.user_id});
     getUserArticleDraftsPromise.then(function(data) {
-        console.log(data);
         res.send(200, data);
     }, function(error) {
         res.send(error);

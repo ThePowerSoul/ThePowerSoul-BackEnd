@@ -167,34 +167,26 @@ router.deleteMessage = function (req, res) {
     var userRecentConverstaion = [];
     var findMessagePromise = PrivateMessage.find({ _id: message_id });
     findMessagePromise.then(function (data) { // 找到对应的消息
-        // console.log(data[0], 111);
         var targetMessage = data[0];
         if (targetMessage.UserID === user_id) {
-            // console.log(user_id, 222);
             targetMessage.UserDelStatus = true;
             target_user_id = targetMessage.TargetUserID;
         } else if (targetMessage.TargetUserID === user_id) {
-            // console.log(user_id, 333);
             targetMessage.TargetUserDelStatus = true;
             target_user_id = targetMessage.UserID;
         }
-        // console.log(message_id);
         PrivateMessage.update({ _id: message_id }, {
             '$set':
                 { 'UserDelStatus': targetMessage.UserDelStatus, 'TargetUserDelStatus': targetMessage.TargetUserDelStatus }
         }).then(function (data) {
-            // console.log(data, 444);
             var index = null;
             User.find({ _id: user_id }).then(function (data) {
-                // console.log(data[0], 555);
                 userRecentConverstaion = data[0].MostRecentConversation;
                 data[0].MostRecentConversation.forEach(function (message, i) {
-                    // console.log(message, i);
                     if (message.MessageID == message_id) {
                         index = i;
                     }
                 });
-                // console.log(index);
                 if (index !== null) {
                     data[0].MostRecentConversation.splice(index, 1);
                     User.update({ _id: user_id }, { '$set': { 'MostRecentConversation': data[0].MostRecentConversation } })

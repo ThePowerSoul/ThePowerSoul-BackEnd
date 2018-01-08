@@ -9,7 +9,6 @@ var router = express.Router();
 function likeTheTopic(topic_id, user_id, res) {
     var likeTopicPromise = Topic.update({ _id: topic_id }, { $push: { "LikeUser": user_id } });
     likeTopicPromise.then(function (data) {
-        console.log("add-like")
         res.send(200, data);
     }, function (error) {
         res.send(error);
@@ -22,7 +21,6 @@ function likeTheTopic(topic_id, user_id, res) {
 function dislikeTheTopic(topic_id, user_id, res) {
     var dislikeTopicPromise = Topic.update({ _id: topic_id }, { $push: { "DislikeUser": user_id } });
     dislikeTopicPromise.then(function (data) {
-        console.log("add-dislike")
         res.send(200, data);
     }, function (error) {
         res.send(error);
@@ -32,7 +30,6 @@ function dislikeTheTopic(topic_id, user_id, res) {
 function removeFromLikeList(topic_id, user_id, res) {
     var removeLikeTopicPromise = Topic.update({ _id: topic_id }, { $pull: { "LikeUser": user_id } });
     return removeLikeTopicPromise.then(function (data) {
-        console.log("dd-remove-like");
     }, function (error) {
         res.send(error);
     });
@@ -41,7 +38,6 @@ function removeFromLikeList(topic_id, user_id, res) {
 function removeFromDislikeList(topic_id, user_id, res) {
     var removeDislikeTopicPromise = Topic.update({ _id: topic_id }, { $pull: { "DislikeUser": user_id } });
     return removeDislikeTopicPromise.then(function (data) {
-        console.log("dd-remove-dislike");
     }, function (error) {
         res.send(error);
     });

@@ -20,7 +20,7 @@ client.on('ready', function (res) {
     console.log('ready');
 });
 
-router.getSiteData = function(req, res) {
+router.getSiteData = function (req, res) {
     var body = {
         RegisteredUserNumber: 0,
         ActiveUserNumber: 0,
@@ -30,20 +30,20 @@ router.getSiteData = function(req, res) {
     var getUserNumberPromise = User.find();
     var getTopicNumberPromise = Topic.find();
     var getArticleNumberPromise = Article.find();
-    getUserNumberPromise.then(function(data) {
+    getUserNumberPromise.then(function (data) {
         body.RegisteredUserNumber = data.length;
-        getTopicNumberPromise.then(function(data) {
+        getTopicNumberPromise.then(function (data) {
             body.TopicCount = data.length;
-            getArticleNumberPromise.then(function(data) {
+            getArticleNumberPromise.then(function (data) {
                 body.ArticleCount = data.length;
                 res.send(200, body);
-            }, function(err) {
+            }, function (err) {
                 res.send(err);
             });
-        }, function(err) {
+        }, function (err) {
             res.send(err);
         });
-    }, function(err) {
+    }, function (err) {
         res.send(err);
     });
 }
@@ -71,7 +71,7 @@ var config = {
 
 var mail = {
     from: 'ThePoserSoul <wps_zy@126.com>',
-    subject: 'ThePowerSoul测试邮件',
+    subject: 'ThePowerSoul注册验证码',
     to: '',
     text: ''
 }
@@ -119,20 +119,20 @@ router.setPicturePublic = function (req, res) {
     co(function* () {
         yield ossClient.putACL(key, 'public-read');
         var obj = yield ossClient.get(key);
-        res.send(200, {Src: obj.res.requestUrls[0]});
+        res.send(200, { Src: obj.res.requestUrls[0] });
         var result = yield ossClient.getACL(key);
     }).catch(function (err) {
         res.send(err);
     });
 }
 
-router.updateProfilePicture = function(req, res) {
+router.updateProfilePicture = function (req, res) {
     var url = req.body.Src; // 获取用户头像的url
     var user_id = req.params.user_id;
-    User.update({_id: user_id}, { $set: {'AvatarID': url}})
-        .then(function(data) {
+    User.update({ _id: user_id }, { $set: { 'AvatarID': url } })
+        .then(function (data) {
             res.send(200);
-        }, function(error) {
+        }, function (error) {
             res.send(500, error);
         });
 }
@@ -192,81 +192,90 @@ router.getUserTopicAndArticleNumber = function (req, res) {
         });
 }
 
-// 获取关注用户发的帖子，文章，关注的人的的帖子
-router.getFollowingTopicsAndArticles = function (req, res) {
+/*
+ * 获取用户关注的用户发的帖子或者文章
+ */
+router.getUserFollowedUsersContent = function (req, res) {
     var user_id = req.params.user_id;
-    User.find({ _id: user_id }).then(function (data) {
-        var topisAndArticles = [];
-        var followingUsers = data[0].FollowingUsers;
-        followingUsers.forEach(function (user_idm, index) {
-            targetUser = User.find({ _id: user_id }).then(function (data) {
-                Topic.find({ '$or': [{ UserID: user_id }, { _id: { '$in': data[0].FollowedTopics } }] }).then(function (data) {
-                    topisAndArticles.push(data);
-                    Article.find({ UserID: user_id }).then(function (data) {
-                        topisAndArticles.push(data);
-                        if (index === followingUsers.length) {
-                            res.send(200, topisAndArticles);
-                        }
-                    }, function (error) {
-                        res.send(error);
-                    });
+    var pageNum = req.body.Page;
+    var findUserPromise = User.find({ _id: user_id }).lean();
+    var result = [];
+    findUserPromise.then(function (data) {
+        var usersArr = data[0].FollowingUsers;
+        for (var i = 0; i < usersArr.length; i++) {
+            var id = usersArr[i];
+            var findUserTopics = Topic.find({ UserID: id });
+            findUserTopics.then(function (topics) {
+                result = result.concat(topics);
+                var findUserArticle = Article.find({ UserID: id });
+                findUserArticle.then(function (articles) {
+                    result = result.concat(articles);
+                    // 对结果按照时间排序
+                    if (result.length > 0) {
+                        result.sort(function (a, b) {
+                            return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
+                        });
+                        var skipNum = (pageNum - 1) * 5;
+                        result = reuslt.slice(skipNum, skipNum + 5);
+                    }
+                    res.send(200, result);
                 }, function (error) {
                     res.send(error);
                 });
             }, function (error) {
                 res.send(error);
             });
-        });
+        }
     }, function (error) {
         res.send(error);
     });
 }
 
-/********************** 初始化加载
- * 								我关注的话题
- * 								我关注的人关注的帖子信息
- * 								我关注的人发表的帖子
- *           
- * 								去重
- * 	 ********************/
-router.getFollowingTopicsAndFollowingUsersFollowingTopics = function (req, res) {
-    var user_id = req.params.user_id;
-    var topics = [];
-    User.find({ _id: user_id })
-        .then(function (data) {
-            var user = data[0];
-            var usersFollowingUsers = user.FollowingUsers; // 当前用户正在关注的用户们
-            Topic.find({ _id: { '$in': user.FollowedTopics } }) // 当前用户正在关注的帖子
-                .then(function (data) {
-                    topics = topics.concat(data);
-                    Topic.find({ UserID: { '$in': usersFollowingUsers } }) // 当前用户正在关注的用户们发的帖子
-                        .then(function (data) {
-                            topics = topics.concat(data);
-                        }, function (error) {
-                            res.send(error);
-                        });
-                    for (var i = 0; i < usersFollowingUsers.length; i++) {
-                        User.find({ _id: usersFollowingUsers[i] })
-                            .then(function (data) {
-                                Topic.find({ _id: { '$in': data[0].FollowedTopics } }) // 当前用户关注的用户们正在关注的帖子
-                                    .then(function (data) {
-                                        topics = topics.concat(data);
-                                    }, function (error) {
-                                        res.send(error);
-                                    });
-                            }, function (error) {
-                                res.send(error);
-                            });
-                    }
-                    topics = removeSameElementInArr(topics); // 去重
-                    res.send(200, topics);
-                }, function (error) {
-                    res.send(error);
-                });
-        }, function (error) {
-            res.send(error);
-        });
-}
+// /********************** 初始化加载
+//  * 								我关注的话题
+//  * 								我关注的人关注的帖子信息
+//  * 								我关注的人发表的帖子
+//  *           
+//  * 								去重
+//  * 	 ********************/
+// router.getFollowingTopicsAndFollowingUsersFollowingTopics = function (req, res) {
+//     var user_id = req.params.user_id;
+//     var topics = [];
+//     User.find({ _id: user_id })
+//         .then(function (data) {
+//             var user = data[0];
+//             var usersFollowingUsers = user.FollowingUsers; // 当前用户正在关注的用户们
+//             Topic.find({ _id: { '$in': user.FollowedTopics } }) // 当前用户正在关注的帖子
+//                 .then(function (data) {
+//                     topics = topics.concat(data);
+//                     Topic.find({ UserID: { '$in': usersFollowingUsers } }) // 当前用户正在关注的用户们发的帖子
+//                         .then(function (data) {
+//                             topics = topics.concat(data);
+//                         }, function (error) {
+//                             res.send(error);
+//                         });
+//                     for (var i = 0; i < usersFollowingUsers.length; i++) {
+//                         User.find({ _id: usersFollowingUsers[i] })
+//                             .then(function (data) {
+//                                 Topic.find({ _id: { '$in': data[0].FollowedTopics } }) // 当前用户关注的用户们正在关注的帖子
+//                                     .then(function (data) {
+//                                         topics = topics.concat(data);
+//                                     }, function (error) {
+//                                         res.send(error);
+//                                     });
+//                             }, function (error) {
+//                                 res.send(error);
+//                             });
+//                     }
+//                     topics = removeSameElementInArr(topics); // 去重
+//                     res.send(200, topics);
+//                 }, function (error) {
+//                     res.send(error);
+//                 });
+//         }, function (error) {
+//             res.send(error);
+//         });
+// }
 
 /*  
     获取我关注的用户们发的文章
@@ -493,7 +502,7 @@ router.removeFromFollowing = function (req, res) {
 router.sendVerifyEmail = function (req, res) {
     var code = createCode();
     mail.to = req.body.Email;
-    mail.text = "看不到文字的都是麻瓜, 请记住你的验证码是：" + code + ",有效期5分钟";
+    mail.text = "看不到文字的都是麻瓜, 请记住你的验证码是：" + code + ", 有效期5分钟。";
     transporter.sendMail(mail, function (error, info) {
         if (error) {
             res.send(500, error);
@@ -513,7 +522,7 @@ router.sendVerifyEmail = function (req, res) {
                             Code: code
                         });
                     } else {
-                        res.send(200, { Message: '请勿短时间内重复索取验证码', Code: response });
+                        res.send(400, { Message: '请勿短时间内重复索取验证码', Code: response });
                     }
                 }
             });

@@ -11,6 +11,7 @@ var CommentSchema = new mongoose.Schema({
 	Category: String,
 	CreatedAt: Date,
 	LikeUser: [],
-	DislikeUser: []
+	DislikeUser: [],
+	ReportUsers: []
 });
 module.exports = mongoose.model('Comment',CommentSchema);

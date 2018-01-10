@@ -216,7 +216,7 @@ router.getUserFollowedUsersContent = function (req, res) {
                             return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
                         });
                         var skipNum = (pageNum - 1) * 5;
-                        result = reuslt.slice(skipNum, skipNum + 5);
+                        result = result.slice(skipNum, skipNum + 5);
                     }
                     res.send(200, result);
                 }, function (error) {

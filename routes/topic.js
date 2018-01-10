@@ -226,6 +226,7 @@ router.addNewTopic = function (req, res) {
     topic.Title = input.Topic["Title"];
     topic.Category = input.Topic["Category"];
     topic.Author = input.Author;
+    topic.AvatarID = input.Avatar;
     topic.Like = 0;
     topic.Dislike = 0;
     topic.View = 0;

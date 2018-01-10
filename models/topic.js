@@ -6,8 +6,10 @@ var TopicSchema = new mongoose.Schema({
 	Category: String,
 	CreatedAt: Date,
 	Author: String,
+	AvatarID: String,
 	View: Number,
 	LikeUser: [],
-	DislikeUser: []
+	DislikeUser: [],
+	ReportUsers: []
 });
 module.exports = mongoose.model('Topic',TopicSchema);

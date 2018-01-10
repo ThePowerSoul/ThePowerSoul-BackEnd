@@ -9,6 +9,7 @@ var ArticleSchema = new mongoose.Schema({
 	IsArticle: Boolean,
 	View: Number,
 	LikeUser: [],
-	DislikeUser: []
+	DislikeUser: [],
+	ReportUsers: []
 });
 module.exports = mongoose.model('Article', ArticleSchema);

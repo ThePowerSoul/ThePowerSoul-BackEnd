@@ -15,15 +15,28 @@ var ossClient = new oss.Wrapper({
     region: 'oss-cn-beijing'
 });
 
-router.setVideoPublic = function(req, res) {
+router.setVideoPublic = function (req, res) {
     var key = req.body.Key;
     co(function* () {
         yield ossClient.putACL(key, 'public-read');
         var obj = yield ossClient.get(key);
-        res.send(200, {Src: obj.res.requestUrls[0]});
+        res.send(200, { Src: obj.res.requestUrls[0] });
         var result = yield ossClient.getACL(key);
     }).catch(function (err) {
         res.send(err);
+    });
+}
+
+router.getVideoPreview = function (req, res) {
+    var imgData = req.body.Data;
+    var base64Data = imgData.replace(/^data:image\/png;base64,/, "");
+    var binaryData = new Buffer(base64Data, 'base64').toString('binary');
+    fs.writeFile("video-preview.png", binaryData, 'binary', function (err) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.send("保存成功！");
+        }
     });
 }
 
@@ -37,8 +50,7 @@ router.getUploadPicture = function (req, res) {
         if (file.fileData) {
             filePath = file.fileData.path;
         } else {
-            // 
-            res.send(500, {success: false, msg: '图片上传失败，请重试'});
+            res.send(500, { success: false, msg: '图片上传失败，请重试' });
         }
         var fileExtension = filePath.substring(filePath.lastIndexOf('.'));
         if (('.jpg.jpeg.png.gif').indexOf(fileExtension.toLowerCase()) < 0) {
@@ -49,7 +61,7 @@ router.getUploadPicture = function (req, res) {
             co(function* () {
                 var key = new Date().getTime() + file.fileData.name; //文件名和时间戳共同命名文件
                 var stream = fs.createReadStream(filePath);
-                yield ossClient.put(key, stream); 
+                yield ossClient.put(key, stream);
                 yield ossClient.putACL(key, 'public-read');
                 var data = yield ossClient.get(key);
                 var body = {
@@ -58,12 +70,12 @@ router.getUploadPicture = function (req, res) {
                 }
                 res.send(200, body);
             })
-            .then(function(value) {
-                fs.unlink(filePath); // 在本地系统中删除对应文件
-            })
-            .catch(function (err) {
-                res.send(500, {success: false, msg: '图片上传失败，请重试'});
-            });
+                .then(function (value) {
+                    fs.unlink(filePath); // 在文件系统中删除对应文件
+                })
+                .catch(function (err) {
+                    res.send(500, { success: false, msg: '图片上传失败，请重试' });
+                });
         }
     });
 }
@@ -92,7 +104,7 @@ router.likeTheArticle = function (req, res) {
     });
 }
 
-router.getHotArticles = function(req, res) {
+router.getHotArticles = function (req, res) {
     var article_id = req.params.article_id;
     var findArticlesPromise = Article.find({ _id: article_id });
     findArticlesPromise.then(function (data) {
@@ -126,7 +138,7 @@ router.getArticles = function (req, res) {
     var pageNum = req.body.PageNum;
     var getArticlePromise = Article.find();
     if (loadAll) {
-        
+
     } else {
 
     }
@@ -164,11 +176,11 @@ router.getArticle = function (req, res) {
     });
 }
 
-router.addArticleView = function(req, res) {
-    var addArticleViewPromise = Article.update({_id: article_id}, {$inc: {'View': 1}});
-    addArticleViewPromise.then(function(data) {
+router.addArticleView = function (req, res) {
+    var addArticleViewPromise = Article.update({ _id: article_id }, { $inc: { 'View': 1 } });
+    addArticleViewPromise.then(function (data) {
         res.send(200);
-    }, function(error) {
+    }, function (error) {
         res.send(error);
     });
 }

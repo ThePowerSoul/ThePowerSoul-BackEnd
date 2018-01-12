@@ -109,10 +109,12 @@ app.get('/article', article.getHotArticles);
 app.post('/articles', article.getArticles);
 app.get('/articles/:user_id', article.getUserArticles);
 app.post('/article/:user_id', article.addNewArticle);
+app.post('/article-video-preview', article.getVideoPreview);
 app.put('/article/:user_id/:article_id', article.likeTheArticle);
 app.put('/article/:article_id', article.addArticleView);
 app.put('/set-video-public', article.setVideoPublic);
 app.delete('/article/:article_id', article.deleteArticle);
+
 
 // article draft
 app.get('/article-draft/:article_draft_id', articleDraft.getArticleDraft);

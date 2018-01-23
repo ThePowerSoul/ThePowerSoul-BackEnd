@@ -640,7 +640,7 @@ router.login = function (req, res) {
                             res.send(400, '登陆出错，请重试');
                         } else {
                             client.set(token, token);
-                            client.expire(token, 6000);
+                            client.expire(token, 60000);
                             res.send(200, {
                                 Name: data[0].Name,
                                 DisplayName: data[0].DisplayName,

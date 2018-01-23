@@ -115,7 +115,6 @@ app.put('/article/:article_id', article.addArticleView);
 app.put('/set-video-public', article.setVideoPublic);
 app.delete('/article/:article_id', article.deleteArticle);
 
-
 // article draft
 app.get('/article-draft/:article_draft_id', articleDraft.getArticleDraft);
 app.get('/article-drafts/:user_id', articleDraft.getUserArticleDrafts);

@@ -162,7 +162,7 @@ router.getTopics = function (req, res) {
             if (keyword !== '') {
                 var newArr = [];
                 data.forEach(function (topic) {
-                    if (topic._doc.Title.indexOf(keyword) > 0) {
+                    if (topic._doc.Title.indexOf(keyword) >= 0) {
                         newArr.push(topic);
                     }
                 });

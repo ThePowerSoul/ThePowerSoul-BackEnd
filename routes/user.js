@@ -27,11 +27,20 @@ router.getSiteData = function (req, res) {
         TopicCount: 0,
         ArticleCount: 0
     }
-    var getUserNumberPromise = User.find();
+    var getUserNumberPromise = User.find().lean();
     var getTopicNumberPromise = Topic.find();
     var getArticleNumberPromise = Article.find();
+    var currentDate = new Date();
     getUserNumberPromise.then(function (data) {
         body.RegisteredUserNumber = data.length;
+        var activeUserArr = [];
+        data.forEach(function (item) {
+            var timeGap = (currentDate - item.LastLoginDate) / 1000 / 60 / 60;
+            if (timeGap < 24) {
+                activeUserArr.push(item);
+            }
+        });
+        body.ActiveUserNumber = activeUserArr.length;
         getTopicNumberPromise.then(function (data) {
             body.TopicCount = data.length;
             getArticleNumberPromise.then(function (data) {
@@ -202,29 +211,33 @@ router.getUserFollowedUsersContent = function (req, res) {
     var result = [];
     findUserPromise.then(function (data) {
         var usersArr = data[0].FollowingUsers;
-        for (var i = 0; i < usersArr.length; i++) {
-            var id = usersArr[i];
-            var findUserTopics = Topic.find({ UserID: id });
-            findUserTopics.then(function (topics) {
-                result = result.concat(topics);
-                var findUserArticle = Article.find({ UserID: id });
-                findUserArticle.then(function (articles) {
-                    result = result.concat(articles);
-                    // 对结果按照时间排序
-                    if (result.length > 0) {
-                        result.sort(function (a, b) {
-                            return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
-                        });
-                        var skipNum = (pageNum - 1) * 5;
-                        result = result.slice(skipNum, skipNum + 5);
-                    }
-                    res.send(200, result);
+        if (usersArr.length > 0) {
+            for (var i = 0; i < usersArr.length; i++) {
+                var id = usersArr[i];
+                var findUserTopics = Topic.find({ UserID: id });
+                findUserTopics.then(function (topics) {
+                    result = result.concat(topics);
+                    var findUserArticle = Article.find({ UserID: id });
+                    findUserArticle.then(function (articles) {
+                        result = result.concat(articles);
+                        // 对结果按照时间排序
+                        if (result.length > 0) {
+                            result.sort(function (a, b) {
+                                return Date.parse(b.CreatedAt) - Date.parse(a.CreatedAt);
+                            });
+                            var skipNum = (pageNum - 1) * 5;
+                            result = result.slice(skipNum, skipNum + 5);
+                        }
+                        res.send(200, result);
+                    }, function (error) {
+                        res.send(error);
+                    });
                 }, function (error) {
                     res.send(error);
                 });
-            }, function (error) {
-                res.send(error);
-            });
+            }
+        } else {
+            res.send(200, []);
         }
     }, function (error) {
         res.send(error);
@@ -563,6 +576,7 @@ router.signUp = function (req, res) {
                                 newUser.DisplayName = req.body.DisplayName;
                                 newUser.Email = req.body.Email;
                                 newUser.CreatedAt = new Date();
+                                newUser.LastLoginDate = new Date();
                                 newUser.AvatarID = "";
                                 newUser.WechatID = "";
                                 newUser.Point = 0;
@@ -624,7 +638,7 @@ router.login = function (req, res) {
     var email = input.Email;
     var password = input.Password;
     // 检查用户名是否合法
-    var getUserInstancePromise = User.find({ Email: email });
+    var getUserInstancePromise = User.find({ Email: email }).lean();
     getUserInstancePromise.then(function (data) {
         if (data.length > 0) {
             // 检查密码是否正确
@@ -641,14 +655,18 @@ router.login = function (req, res) {
                         } else {
                             client.set(token, token);
                             client.expire(token, 60000);
-                            res.send(200, {
-                                Name: data[0].Name,
-                                DisplayName: data[0].DisplayName,
-                                Email: data[0].Email,
-                                Point: data[0].Point,
-                                _id: data[0]._id,
-                                SessionID: token,
-                                AvatarID: data[0].AvatarID
+                            User.update({ Email: email }, { $set: { 'LastLoginDate': new Date() } }).then(function (updatedData) {
+                                res.send(200, {
+                                    Name: data[0].Name,
+                                    DisplayName: data[0].DisplayName,
+                                    Email: data[0].Email,
+                                    Point: data[0].Point,
+                                    _id: data[0]._id,
+                                    SessionID: token,
+                                    AvatarID: data[0].AvatarID
+                                });
+                            }, function (error) {
+                                res.send(error);
                             });
                         }
                     })

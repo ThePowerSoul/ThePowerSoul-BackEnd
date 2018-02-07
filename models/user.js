@@ -7,6 +7,7 @@ var UserSchema = new mongoose.Schema({
     Salt: String, // 盐
     AvatarID: String, // 头像id
     CreatedAt: Date, //  创建时间
+    LastLoginDate: Date, //上次登录时间
     FollowingUsers: Array, // 正在关注的人的id数组
     WechatID: String, // 微信id
     Point: Number, // 积分

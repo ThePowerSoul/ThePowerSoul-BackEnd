@@ -32,12 +32,12 @@ db.once('openUri',function(){
 var app = express();
 app.use(cookieParser());
 app.use(cors());
-// app.use(function(req, res, next) {
-//    res.header("Access-Control-Allow-Origin", "*");
-//    res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
-//    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//    next();
-// });
+app.use(function(req, res, next) {
+   res.header("Access-Control-Allow-Origin", "*");
+   res.header('Access-Control-Allow-Methods', 'DELETE, PUT, GET, POST');
+   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   next();
+});
 app.use(session({
    secret: 'thepowersoul-session', // 建议使用随机值
    cookie: ('name', 'value', {path: '/', httpOnly: true,secure: false, maxAge: 60000}), // cookie保存时间

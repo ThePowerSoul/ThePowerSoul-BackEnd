@@ -518,11 +518,13 @@ router.sendVerifyEmail = function (req, res) {
     mail.text = "看不到文字的都是麻瓜, 请记住你的验证码是：" + code + ", 有效期5分钟。";
     transporter.sendMail(mail, function (error, info) {
         if (error) {
+            console.log("first spot");
             res.send(500, error);
         } else {
             // 检查当前email是否有验证码
             client.get(req.body.Email, function (error, response) {
                 if (error) {
+                    console.log("second spot");
                     res.send(500, error);
                 } else {
                     if (response === null) {

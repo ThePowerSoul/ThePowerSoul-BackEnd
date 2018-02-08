@@ -72,6 +72,7 @@ var config = {
     host: 'smtp.126.com',
     secureConnection: true,
     port: 25,
+    requiresAuth: true,
     auth: {
         user: 'wps_zy@126.com',
         pass: 'thepowersoul2017'

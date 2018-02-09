@@ -71,8 +71,7 @@ function createCode() {
 var config = {
     host: 'smtp.126.com',
     secureConnection: true,
-    port: 25,
-    requiresAuth: true,
+    port: 465,
     auth: {
         user: 'wps_zy@126.com',
         pass: 'thepowersoul2017'
